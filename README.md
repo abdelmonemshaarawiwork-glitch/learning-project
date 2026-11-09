@@ -58,9 +58,17 @@ npm run model -- <dir>      # rebuild public/models from the MakeHuman CC0 sourc
 
 `dist/` is a static site. Serve it over **HTTPS** (required for service workers and Web Crypto) from any static host. SPA fallback: unknown paths must return `index.html` (the service worker also handles this once installed). A strict Content-Security-Policy is injected at build time; no third-party origins are contacted.
 
-### Public website on GitHub Pages (included)
+### Public website on Netlify (main)
 
-`.github/workflows/deploy-pages.yml` builds, runs the unit tests and publishes the site to **https://&lt;owner&gt;.github.io/&lt;repository-name&gt;/** on every push to the default branch (or manually: *Actions → Deploy website (GitHub Pages) → Run workflow*).
+```bash
+NETLIFY_AUTH_TOKEN=<personal access token> npm run deploy:netlify
+```
+
+Builds for the site root (`npm run build:netlify`, which adds `_redirects` for single-page routing and `_headers` with security and cache headers) and uploads only changed files through Netlify's API. The first run creates the site (`burnmatrix.netlify.app`, or `burnmatrix-app…` if the name is taken) and records its id in `netlify-site.json`. A custom domain can be added in Netlify → Domain management. The token comes from Netlify → User settings → Applications → Personal access tokens and is never stored in the repository.
+
+### Public website on GitHub Pages (optional alternative)
+
+`.github/workflows/deploy-pages.yml` builds, runs the unit tests and publishes the site to **https://&lt;owner&gt;.github.io/&lt;repository-name&gt;/** when run manually (*Actions → Deploy website (GitHub Pages) → Run workflow*).
 
 One-time setup: repository **Settings → Pages → Build and deployment → Source: GitHub Actions**. A free GitHub plan requires the repository to be public (the code is public; patient data never is — it stays in each visitor's browser).
 

@@ -1,12 +1,12 @@
 # Publishes the BurnMatrix web app to GitHub Pages:
 #   https://<owner>.github.io/<repository-name>/
-# Runs on every push to the repository's default branch, and on demand (Actions → Run workflow).
-# One-time setup in GitHub: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# Optional alternative to the Netlify site. Runs only on demand (Actions → Run workflow), so pushes
+# do not produce failed runs while Pages is not enabled. To use it: Settings → Pages → Build and
+# deployment → Source: "GitHub Actions", then run the workflow (or add `push:` below to run on pushes).
 # The site is static: no server, no database. Patient data stays in each visitor's browser.
 name: Deploy website (GitHub Pages)
 
 on:
-  push:
   workflow_dispatch:
 
 permissions:
@@ -20,7 +20,6 @@ concurrency:
 
 jobs:
   build:
-    if: github.event_name == 'workflow_dispatch' || github.ref_name == github.event.repository.default_branch
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
