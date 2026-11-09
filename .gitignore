@@ -8,3 +8,6 @@ test-results
 .DS_Store
 *.local
 dist-artifact
+
+# Website package for manual upload (npm run build:netlify, then zip dist/)
+BurnMatrix-website.zip
