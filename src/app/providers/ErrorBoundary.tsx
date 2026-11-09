@@ -52,7 +52,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <button className="rounded-lg border px-3 py-2 text-sm" onClick={() => this.setState({ error: null })}>
             Try again
           </button>
-          <button className="rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground" onClick={() => (import.meta.env.VITE_TARGET === 'artifact' ? window.location.reload() : window.location.assign('/'))}>
+          <button className="rounded-lg bg-primary px-3 py-2 text-sm text-primary-foreground" onClick={() => (import.meta.env.VITE_TARGET === 'artifact' ? window.location.reload() : window.location.assign(import.meta.env.BASE_URL))}>
             Go to dashboard
           </button>
         </div>

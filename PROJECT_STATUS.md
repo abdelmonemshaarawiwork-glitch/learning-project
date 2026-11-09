@@ -23,6 +23,7 @@ All ten development phases are implemented, plus two additions in v1.1 — a **r
 | v1.1-a | Realistic 3D anatomical model: build script (OBJ + skeleton weights → 33 segment-surface meshes), manifest, licence, viewer integration, fallback | ✅ Done |
 | v1.2 | Local accounts: sign-up / sign-in pages, PBKDF2 password hashes, lockout, tab or 30-day session, separate clinical database per account (first account adopts pre-existing records), account menu, Settings → Account (profile, change password, delete account), hosted preview republished | ✅ Done |
 | Rename | Product renamed **BurnMatrix** (screens, page title, installed-app name, PDF headers, downloaded file names); internal storage identifiers unchanged for compatibility | ✅ Done |
+| Hosting | Public website via GitHub Pages: sub-path-aware build (`BT_BASE`, router basename, manifest scope), `404.html` deep-link fallback, deploy workflow (tests → build → deploy); verified locally under `/learning-project/` (sign-up, deep-link reload, 3D model, service worker, offline navigation) | ✅ Done — live once Pages is enabled in repository settings |
 | v1.1-b | Photo-assisted estimate: capture (camera/gallery), consent, EXIF-stripping re-encode, clinician tracing (outlines, burns by depth, side-view divider), planimetry engine with view pooling, apply to Lund and Browder draft, photos table (schema v3), backup/restore of photos, cascade delete | ✅ Done |
 
 ## Completed features

@@ -68,4 +68,7 @@ const routes = [
 ];
 
 /** The hosted preview keeps navigation in memory (its frame cannot use URL paths). */
-export const router = import.meta.env.VITE_TARGET === 'artifact' ? createMemoryRouter(routes) : createBrowserRouter(routes);
+/** Sub-path the site is served from (e.g. "/learning-project" on GitHub Pages), or undefined at the root. */
+const basename = import.meta.env.BASE_URL.replace(/\/+$/, '') || undefined;
+
+export const router = import.meta.env.VITE_TARGET === 'artifact' ? createMemoryRouter(routes) : createBrowserRouter(routes, { basename });

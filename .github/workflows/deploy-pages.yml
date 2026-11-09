@@ -1,0 +1,50 @@
+# Publishes the BurnMatrix web app to GitHub Pages:
+#   https://<owner>.github.io/<repository-name>/
+# Runs on every push to the repository's default branch, and on demand (Actions → Run workflow).
+# One-time setup in GitHub: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# The site is static: no server, no database. Patient data stays in each visitor's browser.
+name: Deploy website (GitHub Pages)
+
+on:
+  push:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Build (served from /<repository-name>/)
+        run: npm run build:pages
+        env:
+          PAGES_REPO: ${{ github.event.repository.name }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

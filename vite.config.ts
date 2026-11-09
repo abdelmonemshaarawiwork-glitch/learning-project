@@ -16,6 +16,12 @@ const rootDir = path.dirname(fileURLToPath(import.meta.url));
 const ARTIFACT = process.env.BT_TARGET === 'artifact';
 
 /**
+ * Public path of the PWA. '/' by default; BT_BASE=/repo-name/ when the site is served from a
+ * sub-path (GitHub Pages project sites: https://<user>.github.io/<repo-name>/).
+ */
+const BASE = ARTIFACT ? './' : `/${(process.env.BT_BASE ?? '/').replace(/^\/+|\/+$/g, '')}/`.replace('//', '/');
+
+/**
  * Strict Content-Security-Policy for production builds: no third-party origins at all,
  * so no analytics, tracking or remote calls can be added accidentally.
  * (Not applied in dev because Vite's HMR preamble is an inline script.)
@@ -45,7 +51,7 @@ function cspPlugin(): Plugin {
 }
 
 export default defineConfig({
-  base: ARTIFACT ? './' : '/',
+  base: BASE,
   define: { 'import.meta.env.VITE_TARGET': JSON.stringify(ARTIFACT ? 'artifact' : 'pwa') },
   plugins: [
     ...(ARTIFACT ? [] : [cspPlugin()]),
@@ -58,7 +64,7 @@ export default defineConfig({
       injectRegister: false,
       includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'models/*'],
       manifest: {
-        id: '/',
+        id: BASE,
         name: 'BurnMatrix — Burn Assessment & ICU Management',
         short_name: 'BurnMatrix',
         description:
@@ -67,8 +73,8 @@ export default defineConfig({
         background_color: '#0b1730',
         display: 'standalone',
         orientation: 'any',
-        start_url: '/',
-        scope: '/',
+        start_url: BASE,
+        scope: BASE,
         categories: ['medical', 'productivity'],
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },

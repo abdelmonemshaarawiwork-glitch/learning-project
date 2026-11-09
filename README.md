@@ -46,6 +46,7 @@ npm run build               # type-check + production build into dist/ (incl. se
 npm run preview             # serve the production build (http://localhost:4173)
 npm run test:e2e            # Playwright end-to-end tests (builds and serves automatically)
 npm run icons               # regenerate PWA icons from SVG
+npm run build:pages         # production build for GitHub Pages (sub-path) into dist/
 npm run model -- <dir>      # rebuild public/models from the MakeHuman CC0 sources (see public/models/README.md)
 ```
 
@@ -56,6 +57,16 @@ npm run model -- <dir>      # rebuild public/models from the MakeHuman CC0 sourc
 ## Deploying
 
 `dist/` is a static site. Serve it over **HTTPS** (required for service workers and Web Crypto) from any static host. SPA fallback: unknown paths must return `index.html` (the service worker also handles this once installed). A strict Content-Security-Policy is injected at build time; no third-party origins are contacted.
+
+### Public website on GitHub Pages (included)
+
+`.github/workflows/deploy-pages.yml` builds, runs the unit tests and publishes the site to **https://&lt;owner&gt;.github.io/&lt;repository-name&gt;/** on every push to the default branch (or manually: *Actions → Deploy website (GitHub Pages) → Run workflow*).
+
+One-time setup: repository **Settings → Pages → Build and deployment → Source: GitHub Actions**. A free GitHub plan requires the repository to be public (the code is public; patient data never is — it stays in each visitor's browser).
+
+`npm run build:pages` builds for the sub-path (`BT_BASE=/<repo>/`, default `/learning-project/`; set `PAGES_REPO` to change it) and copies `index.html` to `404.html`, so a reload on an inner page such as `/patients` still opens the app. Renaming the repository changes the address; the workflow picks up the new name automatically. A custom domain (e.g. `burnmatrix.com`) can be added in *Settings → Pages* — then build with `BT_BASE=/`.
+
+Accounts and records are per website address: the GitHub Pages site, the claude.ai preview and a local copy each have their own separate storage.
 
 ## Installing the PWA on a phone or tablet
 
