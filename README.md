@@ -14,6 +14,7 @@ Every clinical reference (Lund and Browder, Rule of Nines, palm values, urine-ou
 
 | Area | What it does |
 |---|---|
+| Accounts | Sign-up and sign-in pages; each account has its own separate patients, records, settings and verified references in this browser. Passwords stored only as salted PBKDF2-SHA-256 hashes (600 000 iterations); lockout after 5 failed attempts; tab session (12 h) or "keep me signed in" (30 days); profile, change password, delete account. **Local only — no server, no password reset, not encryption** |
 | Dashboard | Live counts, 14-day activity chart, latest-TBSA chart, recent assessments / events / fluid records, configurable attention flags (each shows its rule), backup reminder, quick actions |
 | Patients | Create / edit / delete (typed confirmation, cascade), search, filter, sort, duplicate warning, profile with assessments, fluids, I/O, observations, timeline, report and JSON export |
 | Burn assessment | 10-step workflow; Lund and Browder (age columns), Rule of Nines (adult, paediatric limitation acknowledgement), Palm method (clinician-entered palm %); five depths; superficial excluded; indeterminate reported separately with upper bound; validation; history, amendment (never overwrites) and comparison |
@@ -93,3 +94,5 @@ React 19 · TypeScript (strict) · Vite 7 · Tailwind CSS 4 · shadcn-style comp
 ## Privacy
 
 No backend, no cloud database, no analytics, no tracking, no external API calls. Patient records live only in this browser’s IndexedDB, which the application does **not** encrypt — protect the device (screen lock, disk encryption). Clearing site data or uninstalling deletes records permanently unless a backup exists.
+
+Accounts are **local to the browser**: signing up creates the account in this browser only (a different device or browser starts empty — move records with a backup file), and there is no password reset. Signing in separates the records of people who share a browser and gates the interface, but it is not a security boundary against someone with access to the browser profile or developer tools, and it does not encrypt the stored data.

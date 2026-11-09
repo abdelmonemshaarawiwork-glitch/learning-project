@@ -1,7 +1,7 @@
 {
   "name": "burn-tool",
   "private": true,
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "BURN TOOL - Advanced Burn Assessment & ICU Management Platform (local-first clinical decision-support PWA)",
   "type": "module",
   "scripts": {

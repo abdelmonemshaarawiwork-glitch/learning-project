@@ -8,7 +8,7 @@ import { nowIso } from '@/utils/dates';
 
 export const PRIVACY_POINTS = [
   'All patient data is stored only in this browser on this device (IndexedDB). Nothing is sent to any server, and there are no analytics or tracking scripts.',
-  'Data is NOT synchronised between devices or browsers.',
+  'Data is NOT synchronised between devices or browsers. Each account on this browser has its own separate records; signing in limits who can use the app here but does not encrypt anything.',
   'Data stored in IndexedDB is not encrypted by the application. Protect the device with a screen lock and an encrypted disk.',
   'Clearing browser data, uninstalling the app or resetting the device can permanently delete records. Export regular backups (Settings → Backup & restore).',
   'Clinical reference datasets and fluid protocols are shipped NOT CONFIGURED and must be verified by a qualified clinician before any calculation is enabled.',

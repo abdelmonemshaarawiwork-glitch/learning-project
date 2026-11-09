@@ -42,6 +42,8 @@ interface DraftState {
   upsertPalm: (entry: PalmEntryInput) => Promise<void>;
   removePalm: (id: string) => Promise<void>;
   discard: () => Promise<void>;
+  /** Forgets the in-memory draft (on sign-in/sign-out); the next load() reads the new account's database. */
+  reset: () => void;
 }
 
 async function persistDraft(d: AssessmentDraft | null) {
@@ -101,5 +103,6 @@ export const useAssessmentDraft = create<DraftState>()((set, get) => {
       if (cur) await commit({ ...cur, palmEntries: cur.palmEntries.filter((e) => e.id !== id) });
     },
     discard: async () => commit(null),
+    reset: () => set({ draft: null, loaded: false }),
   };
 });

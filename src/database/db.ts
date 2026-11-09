@@ -70,6 +70,23 @@ export type TableName = (typeof ALL_TABLES)[number];
 
 export let db = new BurnToolDB();
 
+/**
+ * Opens the clinical database of the signed-in account (each account has its own database).
+ * The previous database is closed first, so records of different accounts never mix.
+ */
+export async function openDatabase(name: string): Promise<BurnToolDB> {
+  if (db.name === name && db.isOpen()) return db;
+  db.close();
+  db = new BurnToolDB(name);
+  await db.open();
+  return db;
+}
+
+/** Closes the active clinical database (used on sign-out and account deletion). */
+export function closeDatabase() {
+  db.close();
+}
+
 /** Test helper: replace the singleton with a fresh database. */
 export async function resetDatabaseForTests(name = `burn-tool-test-${crypto.randomUUID()}`): Promise<BurnToolDB> {
   db.close();

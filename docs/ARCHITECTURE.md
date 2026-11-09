@@ -85,6 +85,14 @@ bundled template ──ensureBundledTemplates──► NOT CONFIGURED ──clin
 
 `pdf/runReport.ts` loads one patient's data (`reportData.ts`, scope-asserted), builds sections with `PdfBuilder` (jsPDF + autotable, A4, branded header, patient identifier on every page, disclaimer + "Page X of Y" footer, WinAnsi-safe text, vector body map from the same geometry as the on-screen 2D map) and downloads or opens it for printing. jsPDF is loaded only when a report is generated.
 
+## Accounts (local)
+
+`src/features/auth/`: `password.ts` (PBKDF2 hashing, constant-time compare, rules), `accounts.ts` (accounts database, sign-up/in, lockout, profile, password change, deletion, session storage), `AuthProvider.tsx` (session state; resets the active patient and the assessment draft on every sign-in/out; audits `sign-up`, `sign-in`, `sign-out` in the account's own audit log), `AuthScreen.tsx` (sign-in / create-account page), `UserMenu.tsx`, `AccountTab.tsx` (Settings → Account).
+
+`App` → `AuthProvider` → `AuthGate`: signed out → `AuthScreen`; signed in → `DatabaseGate key={userId} dbName={session.dbName}` → disclaimer → router. Keying the gate by account remounts the whole app on a switch, so no live query or cached state crosses accounts. On sign-out the router returns to the dashboard.
+
+Limits (stated in the UI): accounts live in one browser; no server, no recovery; access control is at the interface level only and stored data is not encrypted.
+
 ## Error handling
 
 * `ErrorBoundary` at app and route level, inline boundary around the 3D viewer.
@@ -94,6 +102,7 @@ bundled template ──ensureBundledTemplates──► NOT CONFIGURED ──clin
 
 ## Security notes
 
+* Local accounts: PBKDF2-SHA-256 (600 000 iterations, random 16-byte salt), generic "email or password is incorrect" message, comparable work for unknown emails, 60 s lock after 5 failures. Interface-level separation only (not encryption, not a defence against someone with browser-profile access).
 * Strict CSP (production), `referrer: no-referrer`, no third-party scripts or fonts (Inter is bundled).
 * Backup encryption: Web Crypto AES-GCM-256, PBKDF2-SHA-256 (600 000 iterations), random salt/IV; password never stored.
 * Dev-dependency advisories (`npm audit`) affect only build tooling (`workbox-build` transitive deps); `npm audit --omit=dev` reports 0 vulnerabilities.

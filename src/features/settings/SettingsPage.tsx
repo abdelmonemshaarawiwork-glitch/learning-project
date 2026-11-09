@@ -1,4 +1,4 @@
-import { Archive, BookOpen, Database, Droplets, Flag, Gauge, Info, Settings2, ShieldCheck, SlidersHorizontal } from 'lucide-react';
+import { Archive, BookOpen, Database, Droplets, Flag, Gauge, Info, Settings2, ShieldCheck, SlidersHorizontal, UserRound } from 'lucide-react';
 import { useSearchParams } from 'react-router';
 import { PageHeader } from '@/components/common/PageHeader';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -9,6 +9,7 @@ import { UrineTargetsTab } from './UrineTargetsTab';
 import { ThresholdsTab } from './ThresholdsTab';
 import { BackupTab } from './backup/BackupTab';
 import { DataTab } from './DataTab';
+import { AccountTab } from '@/features/auth/AccountTab';
 
 const TABS = [
   { id: 'preferences', label: 'Preferences', icon: Settings2 },
@@ -20,6 +21,7 @@ const TABS = [
   { id: 'backup', label: 'Backup & restore', icon: Archive },
   { id: 'data', label: 'Data management', icon: Database },
   { id: 'about', label: 'Privacy & about', icon: Info },
+  { id: 'account', label: 'Account', icon: UserRound },
 ] as const;
 
 export default function SettingsPage() {
@@ -27,7 +29,7 @@ export default function SettingsPage() {
   const tab = TABS.some((t) => t.id === params.get('tab')) ? params.get('tab')! : 'preferences';
   return (
     <>
-      <PageHeader title="Settings" description="Preferences, clinical reference configuration, backup and data management." />
+      <PageHeader title="Settings" description="Preferences, clinical reference configuration, backup, data management and your account." />
       <Tabs value={tab} onValueChange={(v) => setParams({ tab: v }, { replace: true })}>
         <TabsList>
           {TABS.map((t) => (
@@ -63,9 +65,12 @@ export default function SettingsPage() {
         <TabsContent value="about">
           <AboutTab />
         </TabsContent>
+        <TabsContent value="account">
+          <AccountTab />
+        </TabsContent>
       </Tabs>
       <p className="mt-6 flex items-center gap-2 text-xs text-muted-foreground">
-        <ShieldCheck className="size-3.5" /> Settings are stored locally on this device.
+        <ShieldCheck className="size-3.5" /> Settings are stored locally on this device, separately for each account.
       </p>
     </>
   );

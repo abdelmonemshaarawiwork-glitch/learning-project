@@ -1,4 +1,4 @@
-import { db } from '@/database/db';
+import { db, openDatabase } from '@/database/db';
 import { REFERENCE_TEMPLATES } from '@/reference-data/tbsa-templates';
 import { FLUID_PROTOCOL_TEMPLATES } from '@/reference-data/fluid-protocol-templates';
 import type { FluidProtocol, ReferenceDataset } from '@/types/domain';
@@ -57,7 +57,9 @@ export async function requestPersistentStorage(): Promise<boolean | null> {
   }
 }
 
-export async function initialiseDatabase(): Promise<void> {
-  await db.open();
+/** Opens (and migrates) the given account database, or the current one, and adds missing templates. */
+export async function initialiseDatabase(name?: string): Promise<void> {
+  if (name) await openDatabase(name);
+  else await db.open();
   await ensureBundledTemplates();
 }

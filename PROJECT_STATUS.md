@@ -1,10 +1,10 @@
 # PROJECT_STATUS — BURN TOOL
 
-_Last updated: 2026-11-09 · Application v1.1.0 · Database schema v3_
+_Last updated: 2026-11-09 · Application v1.2.0 · Database schema v3 (+ accounts database v1)_
 
 ## Summary
 
-All ten development phases are implemented, plus two additions in v1.1: a **realistic 3D anatomical body model** (MakeHuman, CC0) and a **photo-assisted TBSA estimate**. Type checking, 161 unit/component tests, the production build and 23 Playwright end-to-end tests pass (results below). The application is **not clinically validated**; all bundled clinical references ship **NOT CONFIGURED** and must be verified locally before any calculation is enabled.
+All ten development phases are implemented, plus two additions in v1.1 — a **realistic 3D anatomical body model** (MakeHuman, CC0) and a **photo-assisted TBSA estimate** — and **local accounts with sign-up / sign-in pages** in v1.2. Type checking, 175 unit/component tests, the production build and 28 Playwright end-to-end tests pass (results below). The application is **not clinically validated**; all bundled clinical references ship **NOT CONFIGURED** and must be verified locally before any calculation is enabled.
 
 ## Phase status
 
@@ -21,6 +21,7 @@ All ten development phases are implemented, plus two additions in v1.1: a **real
 | 9 | Backup/restore (plain + AES-GCM), PWA (manifest, SW, icons, offline indicator, update prompt) | ✅ Done |
 | 10 | Tests, responsive checks, production build, documentation | ✅ Done |
 | v1.1-a | Realistic 3D anatomical model: build script (OBJ + skeleton weights → 33 segment-surface meshes), manifest, licence, viewer integration, fallback | ✅ Done |
+| v1.2 | Local accounts: sign-up / sign-in pages, PBKDF2 password hashes, lockout, tab or 30-day session, separate clinical database per account (first account adopts pre-existing records), account menu, Settings → Account (profile, change password, delete account), hosted preview republished | ✅ Done |
 | v1.1-b | Photo-assisted estimate: capture (camera/gallery), consent, EXIF-stripping re-encode, clinician tracing (outlines, burns by depth, side-view divider), planimetry engine with view pooling, apply to Lund and Browder draft, photos table (schema v3), backup/restore of photos, cascade delete | ✅ Done |
 
 ## Completed features
@@ -32,16 +33,18 @@ Dashboard (live stats, charts from real data, recent assessments/events/fluid re
 | Suite | Command | Result |
 |---|---|---|
 | Type check | `npm run typecheck` | ✅ 0 errors |
-| Unit + component (Vitest 5, jsdom, fake-indexeddb) | `npm test` | ✅ **161 passed**, 15 files |
+| Unit + component (Vitest 5, jsdom, fake-indexeddb) | `npm test` | ✅ **175 passed**, 16 files |
 | Coverage | `npx vitest run --coverage` | engines/tbsa 95 % stmts · engines/fluids 91 % · database/backup 91 % · engines/integrity 72 % · all covered files 74 % |
-| End-to-end (Playwright 1.63, Chromium) | `npm run test:e2e` | ✅ **23 passed** |
-| Production build | `npm run build` | ✅ built; service worker precaches 95 entries (~4.1 MB, incl. the 0.57 MB body model) |
+| End-to-end (Playwright 1.63, Chromium) | `npm run test:e2e` | ✅ **28 passed** |
+| Production build | `npm run build` | ✅ built; service worker precaches 91 entries (~4.1 MB, incl. the 0.57 MB body model) |
 | Dev server smoke | `npm run dev` + browser check | ✅ pages render, no console errors |
 | Dependency audit | `npm audit --omit=dev` | ✅ 0 vulnerabilities (dev-only: 4 moderate + 2 low in `workbox-build` transitive deps) |
 
 Unit coverage includes: zero / full / partial involvement, superficial exclusion, multiple regions and depths, pediatric column selection (all 11 age boundaries), invalid input (negative, >100, NaN, unknown region, missing column), rounding (half away from zero, single rounding of totals, decimal artefacts), indeterminate regions, duplicate entries, Rule of Nines mapping and paediatric applicability, palm method; fluid estimates (configured, missing configuration, invalid weight/TBSA, time intervals, resuscitation-start reference, phase validation); urine output (calculation, weight/duration/volume validation, target selection/labelling); fluid balance (totals, net, buckets, date filter, patient separation); thresholds; integrity hashing/tamper detection; DB CRUD, relationships, cascade delete, transaction rollback, v1→v2 migration, verification workflow; backup (full/patient scope, restore, skip/replace/copy, checksum tampering, incompatible versions, invalid records, encryption round-trip and wrong password); attention flags; report scoping and all 9 PDF types; 3D mannequin coverage/orientation; model manifest validation; BodyMap2D, ConfirmDialog, RegionalEditor components.
 
 v1.1 additions — unit: GLB/manifest coverage of all 33 segment surfaces; planimetry rasterisation, side-view divider split, overlap precedence, out-of-outline burns, impossible surfaces, view pooling formula, scale independence, rounding cap, hand-off to the Lund and Browder engine; photo backup round-trip, consent enforcement, cascade delete, v1→v3 migration. E2E: realistic model loads with attribution and anterior/posterior taps select the right surfaces; mannequin fallback without a manifest; full photo workflow (consent gate, front + lateral tracing with divider, pooled ≈ 66.7 %, apply to draft, TBSA 1.0 %).
+
+v1.2 additions — unit: password hashing/salting/rules, sign-up validation and case-insensitive duplicate email, sign-in success and identical error for wrong password / unknown email, lockout and expiry, profile update, password change, account deletion removes its database, patient isolation between account databases, adoption of pre-account records by the first account only, tab vs. device session, expired session, no password in session. E2E: sign-up validation → sign-up → account menu → sign-out → duplicate email refused → wrong password → sign-in with data intact; two accounts see only their own patients; session survives reload and "keep me signed in" survives a new tab; change password and delete account; sign-in page fits a 390 px phone. Every other E2E test now starts by creating a fresh account.
 
 E2E coverage: patient create/search/filter/sort/edit/reload persistence/delete; form validation and duplicate warning; Lund and Browder workflow (blocked until verified, superficial excluded, indeterminate flagged, >100 % rejected, save, PDF download, repeat assessment, history comparison); Rule of Nines child limitation; Palm method; fluid estimate (NOT CONFIGURED gate, Parkland numbers, time since injury vs. resuscitation, administered/remaining, invalid weight/TBSA); I/O totals, net balance, patient separation, edit/delete, interval filter, hourly view; urine output; monitoring thresholds, BP, trends; timeline CRUD/filter; complete report PDF; backup → delete all → restore, duplicate detection; encrypted backup; offline PWA (SW install, offline reload, navigation, persistence, backup offline); 3D viewer selection and camera views; WebGL-unavailable 2D fallback; no horizontal overflow on 16 routes at mobile (390 px), tablet (820 px) and desktop (1280 px); mobile drawer/bottom bar; collapsible tablet sidebar.
 
@@ -53,7 +56,7 @@ Not automated: WebKit/Safari and Firefox runs (only Chromium is available in thi
 2. **Reference values are unverified transcriptions** until a clinician verifies them in the app. Lund and Browder (1944) bibliographic details could not be confirmed in PubMed.
 3. **3D model region boundaries are approximate.** The bundled realistic model (MakeHuman base mesh, CC0) was segmented automatically; boundaries have not been clinically reviewed and the viewer says so. The base mesh is a single neutral adult body shape (no age, sex or habitus variants; slight breast form), so it does not represent individual patients or children.
 4. **Photo-assisted estimates are clinician-traced and not validated.** No automatic burn or depth detection. 2D photographs foreshorten curved surfaces; the view-pooling rule is a documented geometric heuristic. Estimates can be applied only to Lund and Browder drafts and only after explicit review. Photos are not embedded in PDF reports.
-5. IndexedDB data is **not encrypted** by the application (only exported backups can be). No multi-user access control; anyone with the unlocked device can open the app.
+5. IndexedDB data is **not encrypted** by the application (only exported backups can be). Accounts (v1.2) are local to one browser and separate users' records at the interface level; they are not a security boundary against someone with access to the browser profile or developer tools. No password recovery.
 6. No data synchronisation between devices (by design).
 7. Region colouring on the maps shows the most severe depth per region surface; exact distribution within a region is not drawn.
 8. Times use the device's local time zone for display and hourly/daily bucketing; records are stored in UTC.
@@ -83,4 +86,4 @@ All of them (by design, verification happens on each deployment):
 2. Clinically review the 3D model's region boundaries (then set `anatomicallyReviewed: true`), and evaluate the photo-assisted estimate against independent clinical estimates.
 3. Run the E2E suite on WebKit and Firefox (`npx playwright install webkit firefox`, add projects) and on physical iOS/Android devices.
 4. Accessibility audit with a screen reader.
-5. Optional: application-level encryption of IndexedDB with a session passphrase; per-user sign-in for shared devices.
+5. Optional: application-level encryption of each account's database with a key derived from its password (would make the sign-in a real protection of stored data).

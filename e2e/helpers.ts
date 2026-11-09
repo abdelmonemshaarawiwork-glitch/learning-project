@@ -1,9 +1,51 @@
 import { expect, type Page } from '@playwright/test';
 
-export async function openApp(page: Page, path = '/') {
-  await page.goto(path);
+export const TEST_PASSWORD = 'Testpass 2026';
+
+export const uniqueEmail = (tag = 'e2e') => `${tag}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@test.local`;
+
+/** Fills and submits the "Create account" form (the auth screen must be visible). */
+export async function signUp(page: Page, { name = 'Dr E2E', email = uniqueEmail(), password = TEST_PASSWORD, keep = false } = {}) {
+  const auth = page.getByTestId('auth-screen');
+  await auth.getByRole('tab', { name: 'Create account' }).click();
+  await page.locator('#auth-name').fill(name);
+  await page.locator('#auth-email').fill(email);
+  await page.locator('#auth-password').fill(password);
+  await page.locator('#auth-confirm').fill(password);
+  if (keep) await auth.getByRole('checkbox', { name: /Keep me signed in/ }).check();
+  await page.getByTestId('auth-submit').click();
+  return email;
+}
+
+/** Fills and submits the "Sign in" form (the auth screen must be visible). */
+export async function signIn(page: Page, email: string, password = TEST_PASSWORD) {
+  const auth = page.getByTestId('auth-screen');
+  await auth.getByRole('tab', { name: 'Sign in' }).click();
+  await page.locator('#auth-email').fill(email);
+  await page.locator('#auth-password').fill(password);
+  await page.getByTestId('auth-submit').click();
+}
+
+/** Acknowledges the first-use notice of a new account, if shown, and waits for the app shell. */
+export async function acknowledgeDisclaimer(page: Page) {
   const gate = page.getByRole('dialog', { name: /Welcome to BURN TOOL/ });
   const shell = page.locator('#main');
+  await expect(gate.or(shell).first()).toBeVisible({ timeout: 15_000 });
+  if (await gate.isVisible()) {
+    await gate.getByRole('checkbox').check();
+    await gate.getByRole('button', { name: /I understand/ }).click();
+  }
+  await expect(shell).toBeVisible();
+}
+
+/** Opens the app; when signed out, creates a fresh account (each test gets its own empty data). */
+export async function openApp(page: Page, path = '/') {
+  await page.goto(path);
+  const auth = page.getByTestId('auth-screen');
+  const gate = page.getByRole('dialog', { name: /Welcome to BURN TOOL/ });
+  const shell = page.locator('#main');
+  await expect(auth.or(gate).or(shell).first()).toBeVisible({ timeout: 15_000 });
+  if (await auth.isVisible()) await signUp(page);
   await expect(gate.or(shell).first()).toBeVisible({ timeout: 15_000 });
   if (await gate.isVisible()) {
     await gate.getByRole('checkbox').check();

@@ -4,13 +4,19 @@
 
 ## First start
 
-1. Read and accept the disclaimer and privacy notice.
-2. **Configure clinical references before use** (Settings):
+1. **Create an account** (*Create account* tab): name, email, optional role and a password of at least 10 characters with letters and numbers. The account exists **only in this browser on this device**; on another device or browser, create an account there and move records with a backup file. There is no password reset — keep backups.
+   * *Keep me signed in on this device* keeps you signed in for 30 days; otherwise the session ends when the tab is closed (or after 12 hours).
+   * Several people can use the same browser: each account sees only its own patients, records, settings and verified references.
+   * After 5 wrong passwords the account is locked for 60 seconds.
+   * The account menu (your initials, top right) has *Account settings* (edit profile, change password, delete account) and *Sign out*.
+   * Signing in is not encryption: protect the device with a screen lock and an encrypted disk.
+2. Read and accept the disclaimer and privacy notice (once per account).
+3. **Configure clinical references before use** (Settings, separately for each account):
    * *Clinical references* — open each dataset, compare every value with the cited source, click **Verify**, enter your name, role and date and confirm the attestation.
    * *Fluid protocols* — verify only the protocols used locally; create an institution-defined protocol if needed.
    * *Urine targets* — enter your institution's age-specific targets and their reference, then verify. Until then, urine-output results are not labelled.
    * *Warning thresholds* / *Attention flags* — optional, from local policy.
-3. Settings → *Preferences*: units (kg/lb, cm/in, °C/°F), date/time format, default method, theme.
+4. Settings → *Preferences*: units (kg/lb, cm/in, °C/°F), date/time format, default method, theme.
 
 Anything not verified shows **NOT CONFIGURED** and its calculation is disabled.
 

@@ -1,8 +1,18 @@
 # Database
 
-IndexedDB via Dexie 4. Database name: `burn-tool`. Defined in `src/database/db.ts`; versions in `src/database/migrations/index.ts`; current store map in `src/database/schema.ts`.
+IndexedDB via Dexie 4. Defined in `src/database/db.ts`; versions in `src/database/migrations/index.ts`; current store map in `src/database/schema.ts`.
 
-## Tables (schema v3)
+## Databases per account (v1.2)
+
+| Database | Contents |
+|---|---|
+| `burn-tool-accounts` | One table `accounts` (`id`, `&email`): display name, role, lower-cased email, PBKDF2-SHA-256 hash + 16-byte salt + iteration count (600 000), `dbName`, created / last sign-in, failed-attempt counter, `lockedUntil`. No passwords, no clinical data. Defined in `src/features/auth/accounts.ts`. |
+| `burn-tool-u-<accountId>` | The clinical database of one account (all tables below). |
+| `burn-tool` | Clinical database used before accounts existed. If it holds patients, the **first** account created in the browser adopts it, so earlier records are not lost. |
+
+`openDatabase(name)` closes the active clinical database and opens the signed-in account's one; sign-out closes it; *Delete account* (password + typed confirmation) deletes the account row and its clinical database. The session (account id, name, email, database name, expiry; never the password) is kept in `sessionStorage`, or in `localStorage` with *keep me signed in*.
+
+## Tables of a clinical database (schema v3)
 
 | Table | Primary key | Indexes | Notes |
 |---|---|---|---|

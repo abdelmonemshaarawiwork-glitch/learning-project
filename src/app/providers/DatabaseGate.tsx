@@ -5,8 +5,16 @@ import { Spinner } from '@/components/ui/states';
 import { describeError, logTechnicalError } from '@/utils/logger';
 import { useAssessmentDraft } from '@/stores/assessmentDraft';
 
+interface DatabaseGateProps {
+  children: React.ReactNode;
+  /** IndexedDB database of the signed-in account. */
+  dbName?: string;
+  /** Called once the database is open (e.g. to record the sign-in in the audit log). */
+  onOpened?: () => Promise<void> | void;
+}
+
 /** Opens IndexedDB (running migrations) before rendering the app. */
-export function DatabaseGate({ children }: { children: React.ReactNode }) {
+export function DatabaseGate({ children, dbName, onOpened }: DatabaseGateProps) {
   const [state, setState] = React.useState<{ status: 'loading' | 'ready' | 'error'; message?: string }>({ status: 'loading' });
   const loadDraft = useAssessmentDraft((s) => s.load);
 
@@ -14,15 +22,20 @@ export function DatabaseGate({ children }: { children: React.ReactNode }) {
     setState({ status: 'loading' });
     try {
       if (typeof indexedDB === 'undefined') throw new Error('IndexedDB is not available in this browser (private mode may disable it).');
-      await initialiseDatabase();
+      await initialiseDatabase(dbName);
       await loadDraft();
+      try {
+        await onOpened?.();
+      } catch (e) {
+        logTechnicalError('database opened callback', e);
+      }
       void requestPersistentStorage();
       setState({ status: 'ready' });
     } catch (e) {
       logTechnicalError('database init', e);
       setState({ status: 'error', message: describeError(e) });
     }
-  }, [loadDraft]);
+  }, [loadDraft, dbName, onOpened]);
 
   React.useEffect(() => {
     void init();

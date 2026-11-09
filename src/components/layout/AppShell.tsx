@@ -5,6 +5,7 @@ import { useEffect } from 'react';
 import { APP_NAME, CLINICAL_DISCLAIMER } from '@/constants/clinical';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { DrawerAccount, UserMenu } from '@/features/auth/UserMenu';
 import { useUiStore } from '@/stores/ui';
 import { cn } from '@/utils/cn';
 import { MOBILE_PRIMARY, NAV_ITEMS } from './nav';
@@ -127,6 +128,7 @@ export function AppShell() {
             <div className="flex-1 overflow-y-auto px-2.5 py-4">
               <NavList onNavigate={() => setMobileNavOpen(false)} />
             </div>
+            <DrawerAccount />
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
@@ -149,6 +151,7 @@ export function AppShell() {
           <div className="ml-auto flex items-center gap-2">
             <OfflineBadge />
             <ThemeToggle />
+            <UserMenu />
           </div>
         </header>
 
