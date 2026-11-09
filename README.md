@@ -60,6 +60,8 @@ npm run model -- <dir>      # rebuild public/models from the MakeHuman CC0 sourc
 
 ### Public website on Netlify (main)
 
+Live site: **https://burnmatrix.netlify.app**
+
 ```bash
 NETLIFY_AUTH_TOKEN=<personal access token> npm run deploy:netlify
 ```
