@@ -1,7 +1,8 @@
 import { OrbitControls, useGLTF } from '@react-three/drei';
 import { Canvas, useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import { RotateCcw, TriangleAlert } from 'lucide-react';
-import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Suspense, use, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GLTFLoader } from 'three-stdlib';
 import * as THREE from 'three';
 import type { OrbitControls as OrbitControlsImpl } from 'three-stdlib';
 import { ErrorBoundary } from '@/app/providers/ErrorBoundary';
@@ -166,9 +167,41 @@ function DevelopmentMannequin({ depthBySegment, selected, hover, setHover, onSel
 /* Licensed anatomical asset (glTF) — used only when a valid manifest exists */
 /* ------------------------------------------------------------------ */
 
+/**
+ * The hosted preview cannot serve binary .glb files, so its build ships the model as a JS module
+ * (`<file>.js`, default export = base64 bytes) that is parsed in the browser without any fetch.
+ */
+const embeddedModels = new Map<string, Promise<THREE.Group>>();
+function loadEmbeddedModel(file: string): Promise<THREE.Group> {
+  let p = embeddedModels.get(file);
+  if (!p) {
+    const url = new URL(`models/${file}.js`, document.baseURI).href;
+    p = (import(/* @vite-ignore */ url) as Promise<{ default: string }>).then(
+      (mod) =>
+        new Promise<THREE.Group>((resolve, reject) => {
+          const bin = atob(mod.default);
+          const bytes = new Uint8Array(bin.length);
+          for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+          new GLTFLoader().parse(bytes.buffer, '', (g) => resolve(g.scene), reject);
+        }),
+    );
+    embeddedModels.set(file, p);
+  }
+  return p;
+}
+
+function useModelScene(url: string, file: string): THREE.Group {
+  if (import.meta.env.VITE_TARGET === 'artifact') {
+    // eslint-disable-next-line react-hooks/rules-of-hooks
+    return use(loadEmbeddedModel(file));
+  }
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  return useGLTF(url, false, false).scene; // no Draco or Meshopt: avoids CDN and WebAssembly (blocked by the CSP)
+}
+
 function LicensedModel({ url, manifest, depthBySegment, selected, hover, onSelect, setHover, onReady }: MeshSelectionProps & { url: string; manifest: ModelManifest; onReady: () => void }) {
-  const gltf = useGLTF(url, false, false); // no Draco or Meshopt: avoids CDN and WebAssembly (blocked by the CSP)
-  const scene = useMemo(() => gltf.scene.clone(true), [gltf.scene]);
+  const source = useModelScene(url, manifest.file);
+  const scene = useMemo(() => source.clone(true), [source]);
   const forward = forwardVector(manifest.forwardAxis);
 
   /** glTF loaders may de-duplicate names (e.g. "trunk__anterior_1"); resolve robustly. */

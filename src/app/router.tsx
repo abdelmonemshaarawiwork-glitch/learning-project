@@ -1,5 +1,5 @@
 import { lazy, Suspense, type ComponentType } from 'react';
-import { createBrowserRouter, Link, useRouteError } from 'react-router';
+import { createBrowserRouter, createMemoryRouter, Link, useRouteError } from 'react-router';
 import { AppShell } from '@/components/layout/AppShell';
 import { LoadingState } from '@/components/ui/states';
 import { ErrorBoundary } from './providers/ErrorBoundary';
@@ -39,7 +39,7 @@ function NotFound() {
   );
 }
 
-export const router = createBrowserRouter([
+const routes = [
   {
     path: '/',
     element: <AppShell />,
@@ -65,4 +65,7 @@ export const router = createBrowserRouter([
       { path: '*', element: <NotFound /> },
     ],
   },
-]);
+];
+
+/** The hosted preview keeps navigation in memory (its frame cannot use URL paths). */
+export const router = import.meta.env.VITE_TARGET === 'artifact' ? createMemoryRouter(routes) : createBrowserRouter(routes);

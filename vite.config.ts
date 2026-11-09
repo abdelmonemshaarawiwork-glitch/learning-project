@@ -9,6 +9,13 @@ import { VitePWA } from 'vite-plugin-pwa';
 const rootDir = path.dirname(fileURLToPath(import.meta.url));
 
 /**
+ * BT_TARGET=artifact builds a hosted preview for the claude.ai Artifact viewer: relative asset
+ * paths, in-memory routing, no service worker (the viewer frame does not support them) and file
+ * saves through the viewer's `downloads` capability. The default target is the installable PWA.
+ */
+const ARTIFACT = process.env.BT_TARGET === 'artifact';
+
+/**
  * Strict Content-Security-Policy for production builds: no third-party origins at all,
  * so no analytics, tracking or remote calls can be added accidentally.
  * (Not applied in dev because Vite's HMR preamble is an inline script.)
@@ -38,12 +45,15 @@ function cspPlugin(): Plugin {
 }
 
 export default defineConfig({
+  base: ARTIFACT ? './' : '/',
+  define: { 'import.meta.env.VITE_TARGET': JSON.stringify(ARTIFACT ? 'artifact' : 'pwa') },
   plugins: [
-    cspPlugin(),
+    ...(ARTIFACT ? [] : [cspPlugin()]),
     react(),
     tailwindcss(),
     VitePWA({
       // 'prompt' so an update never reloads the page in the middle of data entry.
+      disable: ARTIFACT,
       registerType: 'prompt',
       injectRegister: false,
       includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'models/*'],
@@ -79,9 +89,13 @@ export default defineConfig({
     }),
   ],
   resolve: {
-    alias: { '@': path.resolve(rootDir, 'src') },
+    alias: [
+      ...(ARTIFACT ? [{ find: 'virtual:pwa-register/react', replacement: path.resolve(rootDir, 'src/app/providers/pwa-stub.ts') }] : []),
+      { find: '@', replacement: path.resolve(rootDir, 'src') },
+    ],
   },
   build: {
+    outDir: ARTIFACT ? 'dist-artifact' : 'dist',
     target: 'es2022',
     chunkSizeWarningLimit: 1600,
     rollupOptions: {

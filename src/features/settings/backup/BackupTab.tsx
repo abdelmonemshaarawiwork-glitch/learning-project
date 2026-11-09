@@ -76,7 +76,7 @@ function ExportCard() {
       const backup = await buildBackup(scope === 'all' ? { scope: 'all', includePhotos } : { scope: 'patients', patientIds: selected, includePhotos });
       const payload = encrypt ? await encryptBackup(backup, password) : backup;
       const stamp = nowIso().slice(0, 16).replace(/[:T]/g, '');
-      downloadBlob(new Blob([JSON.stringify(payload)], { type: 'application/json' }), `burn-tool-backup-${scope}-${stamp}${encrypt ? '.encrypted' : ''}.json`);
+      await downloadBlob(new Blob([JSON.stringify(payload)], { type: 'application/json' }), `burn-tool-backup-${scope}-${stamp}${encrypt ? '.encrypted' : ''}.json`);
       if (scope === 'all') await update('lastBackupAt', nowIso());
       setPassword('');
       setConfirm('');

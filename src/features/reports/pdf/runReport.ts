@@ -130,14 +130,15 @@ export async function generateReport(req: ReportRequest): Promise<{ doc: jsPDF; 
 export async function runReport(req: ReportRequest, mode: 'download' | 'print' | 'blob' = 'download'): Promise<Blob | void> {
   const { doc, filename } = await generateReport(req);
   if (mode === 'blob') return doc.output('blob');
-  if (mode === 'print') {
+  if (mode === 'print' && !window.claude?.use) {
     doc.autoPrint();
     const blob = doc.output('blob');
     const url = URL.createObjectURL(blob);
     const win = window.open(url, '_blank');
-    if (!win) downloadBlob(blob, filename); // pop-up blocked: fall back to download
+    if (!win) await downloadBlob(blob, filename); // pop-up blocked: fall back to download
     setTimeout(() => URL.revokeObjectURL(url), 60_000);
     return;
   }
-  downloadBlob(doc.output('blob'), filename);
+  // The hosted preview cannot open the print dialog: the PDF is offered for saving instead.
+  await downloadBlob(doc.output('blob'), filename);
 }

@@ -58,7 +58,7 @@ export default function PatientProfilePage() {
   async function exportData() {
     try {
       const backup = await buildBackup({ scope: 'patients', patientIds: [patient!.id] });
-      downloadBlob(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }), `burn-tool-patient-${safeFilename(patient!.code)}-${new Date().toISOString().slice(0, 10)}.json`);
+      await downloadBlob(new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' }), `burn-tool-patient-${safeFilename(patient!.code)}-${new Date().toISOString().slice(0, 10)}.json`);
       toast.success('Patient data exported.', { description: 'The file contains identifiable data. Store it securely.' });
     } catch (e) {
       toast.error('Export failed.', { description: describeError(e) });
