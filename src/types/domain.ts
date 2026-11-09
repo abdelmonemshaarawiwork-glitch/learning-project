@@ -1,5 +1,5 @@
 /**
- * Core domain types for BURN TOOL.
+ * Core domain types for BurnMatrix.
  *
  * All timestamps are ISO-8601 strings in UTC (e.g. "2026-01-31T14:05:00.000Z"),
  * which sort lexicographically and are portable across backups.

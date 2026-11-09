@@ -1,6 +1,6 @@
 # Clinical validation checklist
 
-BURN TOOL **has not been clinically validated** and has no regulatory clearance. Automated tests verify that the software implements the documented rules; they do not establish clinical safety or effectiveness. Before any clinical use, the deploying organisation must complete and document at least the steps below. Keep signed copies outside the application.
+BurnMatrix **has not been clinically validated** and has no regulatory clearance. Automated tests verify that the software implements the documented rules; they do not establish clinical safety or effectiveness. Before any clinical use, the deploying organisation must complete and document at least the steps below. Keep signed copies outside the application.
 
 ## A. Governance
 

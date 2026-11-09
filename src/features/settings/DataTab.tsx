@@ -98,7 +98,7 @@ export function DataTab() {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-sm text-muted-foreground">
-            Permanently deletes every patient, record, verification, setting and audit entry stored by BURN TOOL in this browser. Bundled reference templates are re-added as NOT
+            Permanently deletes every patient, record, verification, setting and audit entry stored by BurnMatrix in this browser. Bundled reference templates are re-added as NOT
             CONFIGURED.
           </p>
           <Button variant="destructive" onClick={() => setWipeOpen(true)} data-testid="wipe-all">

@@ -1,10 +1,10 @@
-# BURN TOOL
+# BurnMatrix
 
 **Advanced Burn Assessment & ICU Management Platform** — a local-first, offline-capable Progressive Web App for burn assessment (TBSA), fluid-resuscitation estimates, intake/output, monitoring, timeline and reporting.
 
 > **Clinical decision-support software. All calculations and outputs require review by a qualified healthcare professional. This software is not a substitute for clinical judgment.**
 >
-> BURN TOOL has **not** undergone formal clinical validation or regulatory review. It never prescribes, orders or adjusts treatment. See [docs/CLINICAL_VALIDATION.md](docs/CLINICAL_VALIDATION.md).
+> BurnMatrix has **not** undergone formal clinical validation or regulatory review. It never prescribes, orders or adjusts treatment. See [docs/CLINICAL_VALIDATION.md](docs/CLINICAL_VALIDATION.md).
 
 ## Safety model in one paragraph
 
@@ -59,7 +59,7 @@ npm run model -- <dir>      # rebuild public/models from the MakeHuman CC0 sourc
 
 ## Installing the PWA on a phone or tablet
 
-1. Open the deployed HTTPS address in the device browser and wait for “BURN TOOL is ready to work offline”.
+1. Open the deployed HTTPS address in the device browser and wait for “BurnMatrix is ready to work offline”.
 2. **Android (Chrome):** menu ⋮ → *Install app* (or *Add to Home screen*).
    **iOS / iPadOS (Safari):** Share → *Add to Home Screen*.
 3. Launch from the home-screen icon. The app now works without a network connection.

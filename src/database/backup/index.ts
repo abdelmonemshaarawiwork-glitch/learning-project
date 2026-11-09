@@ -213,7 +213,7 @@ export function parseBackupText(text: string): ParsedFile {
     return { kind: 'encrypted', file: r.data as EncryptedBackupFile };
   }
   if (fmt === BACKUP_FORMAT) return { kind: 'plain', data: json };
-  return { kind: 'invalid', error: 'This file is not a BURN TOOL backup.' };
+  return { kind: 'invalid', error: 'This file is not a BurnMatrix backup.' };
 }
 
 export type ImportStrategy = 'skip-existing' | 'replace-existing' | 'import-as-copies';
@@ -262,7 +262,7 @@ export async function analyseBackup(raw: unknown): Promise<BackupAnalysis> {
   base.backup = backup;
 
   if (backup.formatVersion > BACKUP_FORMAT_VERSION)
-    base.fatalErrors.push(`Backup format v${backup.formatVersion} was created by a newer version of BURN TOOL (supported: v${BACKUP_FORMAT_VERSION}). Update the application first.`);
+    base.fatalErrors.push(`Backup format v${backup.formatVersion} was created by a newer version of BurnMatrix (supported: v${BACKUP_FORMAT_VERSION}). Update the application first.`);
   if (backup.schemaVersion > CURRENT_SCHEMA_VERSION)
     base.fatalErrors.push(`Backup database schema v${backup.schemaVersion} is newer than this application's schema v${CURRENT_SCHEMA_VERSION}. Update the application first.`);
   if (backup.schemaVersion < CURRENT_SCHEMA_VERSION)

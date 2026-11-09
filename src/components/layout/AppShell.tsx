@@ -19,7 +19,7 @@ function Brand({ collapsed }: { collapsed?: boolean }) {
       </div>
       {!collapsed && (
         <div className="min-w-0 leading-tight">
-          <p className="text-[15px] font-bold tracking-wide text-white">{APP_NAME}</p>
+          <p className="text-[15px] font-bold tracking-tight text-white">{APP_NAME}</p>
           <p className="truncate text-[11px] text-sidebar-muted">Burn assessment &amp; ICU</p>
         </div>
       )}
@@ -60,7 +60,7 @@ function OfflineBadge() {
     <span
       data-testid="offline-indicator"
       className="inline-flex items-center gap-1.5 rounded-full bg-warning-soft px-2.5 py-1 text-xs font-medium text-warning"
-      title="You are offline. BURN TOOL keeps working: all data is stored on this device."
+      title={`You are offline. ${APP_NAME} keeps working: all data is stored on this device.`}
     >
       <WifiOff className="size-3.5" aria-hidden />
       Offline
@@ -145,7 +145,7 @@ export function AppShell() {
           </button>
           <div className="flex min-w-0 items-center gap-2 md:hidden">
             <Flame className="size-5 text-primary" aria-hidden />
-            <span className="font-bold tracking-wide">{APP_NAME}</span>
+            <span className="font-bold tracking-tight">{APP_NAME}</span>
           </div>
           <p className="hidden truncate text-sm font-semibold md:block">{current?.label ?? APP_NAME}</p>
           <div className="ml-auto flex items-center gap-2">

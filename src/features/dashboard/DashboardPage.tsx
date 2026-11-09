@@ -133,7 +133,7 @@ export default function DashboardPage() {
         <EmptyState
           className="mb-5"
           icon={<Users />}
-          title="Welcome to BURN TOOL"
+          title="Welcome to BurnMatrix"
           description="No patients are registered on this device yet. Before calculating, review and verify the clinical reference datasets and fluid protocols in Settings."
           action={
             <>

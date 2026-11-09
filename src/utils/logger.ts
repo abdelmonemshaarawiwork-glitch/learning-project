@@ -5,7 +5,7 @@
 export function logTechnicalError(context: string, error: unknown): void {
   const err = error instanceof Error ? error : new Error(String(error));
   // eslint-disable-next-line no-console
-  console.error(`[BURN TOOL] ${context}: ${err.name}: ${err.message}`, err.stack ?? '');
+  console.error(`[BurnMatrix] ${context}: ${err.name}: ${err.message}`, err.stack ?? '');
 }
 
 export function describeError(error: unknown): string {
@@ -13,7 +13,7 @@ export function describeError(error: unknown): string {
     if (error.name === 'QuotaExceededError') return 'The device storage is full. Free up space or export a backup and remove old records.';
     if (error.name === 'ConstraintError') return 'A record with the same identifier already exists.';
     if (error.name === 'DatabaseClosedError' || error.name === 'OpenFailedError')
-      return 'The local database could not be opened. Close other BURN TOOL tabs and reload.';
+      return 'The local database could not be opened. Close other BurnMatrix tabs and reload.';
     return error.message || error.name;
   }
   return String(error);

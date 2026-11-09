@@ -57,7 +57,7 @@ export function DatabaseGate({ children, dbName, onOpened }: DatabaseGateProps) 
         <h1 className="mt-3 text-lg font-semibold">The local database could not be opened</h1>
         <p className="mt-2 text-sm text-muted-foreground">{state.message}</p>
         <ul className="mt-3 list-disc pl-5 text-left text-sm text-muted-foreground">
-          <li>Close other BURN TOOL tabs or windows and try again.</li>
+          <li>Close other BurnMatrix tabs or windows and try again.</li>
           <li>Private/incognito browsing may block local storage.</li>
           <li>Check that the device has free storage space.</li>
         </ul>

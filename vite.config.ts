@@ -59,8 +59,8 @@ export default defineConfig({
       includeAssets: ['favicon.svg', 'icons/*.png', 'icons/*.svg', 'models/*'],
       manifest: {
         id: '/',
-        name: 'BURN TOOL — Burn Assessment & ICU Management',
-        short_name: 'BURN TOOL',
+        name: 'BurnMatrix — Burn Assessment & ICU Management',
+        short_name: 'BurnMatrix',
         description:
           'Local-first, offline-capable burn assessment and ICU management decision-support tool. Patient data stays on this device.',
         theme_color: '#0b1730',

@@ -10,11 +10,11 @@ const tags = [...html.matchAll(/<(script|link)\b[^>]*>(<\/script>)?/g)]
   .map((m) => m[0])
   .filter((t) => /type="module"|rel="stylesheet"|rel="modulepreload"/.test(t))
   .map((t) => (t.startsWith('<script') && !t.endsWith('</script>') ? `${t}</script>` : t));
-const page = `<title>BURN TOOL</title>
+const page = `<title>BurnMatrix</title>
 <meta name="theme-color" content="#0b1730">
 ${tags.join('\n')}
 <div id="root"></div>
-<noscript>BURN TOOL requires JavaScript.</noscript>
+<noscript>BurnMatrix requires JavaScript.</noscript>
 `;
 writeFileSync(path.join(dir, 'page.html'), page);
 for (const f of ['sw.js', 'registerSW.js', 'manifest.webmanifest']) rmSync(path.join(dir, f), { force: true });

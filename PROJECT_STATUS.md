@@ -1,4 +1,4 @@
-# PROJECT_STATUS — BURN TOOL
+# PROJECT_STATUS — BurnMatrix
 
 _Last updated: 2026-11-09 · Application v1.2.0 · Database schema v3 (+ accounts database v1)_
 
@@ -22,6 +22,7 @@ All ten development phases are implemented, plus two additions in v1.1 — a **r
 | 10 | Tests, responsive checks, production build, documentation | ✅ Done |
 | v1.1-a | Realistic 3D anatomical model: build script (OBJ + skeleton weights → 33 segment-surface meshes), manifest, licence, viewer integration, fallback | ✅ Done |
 | v1.2 | Local accounts: sign-up / sign-in pages, PBKDF2 password hashes, lockout, tab or 30-day session, separate clinical database per account (first account adopts pre-existing records), account menu, Settings → Account (profile, change password, delete account), hosted preview republished | ✅ Done |
+| Rename | Product renamed **BurnMatrix** (screens, page title, installed-app name, PDF headers, downloaded file names); internal storage identifiers unchanged for compatibility | ✅ Done |
 | v1.1-b | Photo-assisted estimate: capture (camera/gallery), consent, EXIF-stripping re-encode, clinician tracing (outlines, burns by depth, side-view divider), planimetry engine with view pooling, apply to Lund and Browder draft, photos table (schema v3), backup/restore of photos, cascade delete | ✅ Done |
 
 ## Completed features

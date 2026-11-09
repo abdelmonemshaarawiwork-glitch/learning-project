@@ -253,7 +253,7 @@ parts.set('eyes', eyeT);
 const bufferChunks = [];
 let byteLength = 0;
 const gltf = {
-  asset: { version: '2.0', generator: 'BURN TOOL build-anatomical-model.mjs', copyright: 'MakeHuman base mesh hm08 — CC0 1.0 (Data Collection AB, Joel Palmius, Jonas Hauquier)' },
+  asset: { version: '2.0', generator: 'BurnMatrix build-anatomical-model.mjs', copyright: 'MakeHuman base mesh hm08 — CC0 1.0 (Data Collection AB, Joel Palmius, Jonas Hauquier)' },
   scene: 0,
   scenes: [{ name: 'body', nodes: [] }],
   nodes: [],

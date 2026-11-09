@@ -28,7 +28,7 @@ export async function signIn(page: Page, email: string, password = TEST_PASSWORD
 
 /** Acknowledges the first-use notice of a new account, if shown, and waits for the app shell. */
 export async function acknowledgeDisclaimer(page: Page) {
-  const gate = page.getByRole('dialog', { name: /Welcome to BURN TOOL/ });
+  const gate = page.getByRole('dialog', { name: /Welcome to BurnMatrix/ });
   const shell = page.locator('#main');
   await expect(gate.or(shell).first()).toBeVisible({ timeout: 15_000 });
   if (await gate.isVisible()) {
@@ -42,7 +42,7 @@ export async function acknowledgeDisclaimer(page: Page) {
 export async function openApp(page: Page, path = '/') {
   await page.goto(path);
   const auth = page.getByTestId('auth-screen');
-  const gate = page.getByRole('dialog', { name: /Welcome to BURN TOOL/ });
+  const gate = page.getByRole('dialog', { name: /Welcome to BurnMatrix/ });
   const shell = page.locator('#main');
   await expect(auth.or(gate).or(shell).first()).toBeVisible({ timeout: 15_000 });
   if (await auth.isVisible()) await signUp(page);

@@ -122,7 +122,7 @@ export async function generateReport(req: ReportRequest): Promise<{ doc: jsPDF; 
       break;
   }
   const doc = b.finalize();
-  const filename = `burn-tool-${req.type}-${safeFilename(p.code)}-${nowIso().slice(0, 16).replace(/[:T]/g, '')}.pdf`;
+  const filename = `burnmatrix-${req.type}-${safeFilename(p.code)}-${nowIso().slice(0, 16).replace(/[:T]/g, '')}.pdf`;
   return { doc, filename };
 }
 

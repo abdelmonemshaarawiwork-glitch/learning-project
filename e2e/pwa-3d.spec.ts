@@ -9,7 +9,7 @@ test.describe('offline PWA', () => {
       await navigator.serviceWorker.ready;
     });
     const manifest = (await page.evaluate(async () => (await fetch('/manifest.webmanifest')).json())) as { short_name: string };
-    expect(manifest.short_name).toBe('BURN TOOL');
+    expect(manifest.short_name).toBe('BurnMatrix');
     await createPatient(page, { name: 'Offline Patient', weight: '70' });
     // Wait until the service worker controls the page so precached assets are served.
     await page.reload();
@@ -26,7 +26,7 @@ test.describe('offline PWA', () => {
     await page.goto('/settings?tab=backup');
     const download = page.waitForEvent('download');
     await page.getByTestId('export-backup').click();
-    expect((await download).suggestedFilename()).toMatch(/burn-tool-backup-all/);
+    expect((await download).suggestedFilename()).toMatch(/burnmatrix-backup-all/);
     await context.setOffline(false);
   });
 });

@@ -137,7 +137,7 @@ export function AuthScreen() {
             <Flame className="size-6" aria-hidden />
           </div>
           <div className="leading-tight">
-            <p className="text-lg font-bold tracking-wide text-white">{APP_NAME}</p>
+            <p className="text-lg font-bold tracking-tight text-white">{APP_NAME}</p>
             <p className="text-xs text-sidebar-muted">Burn assessment &amp; ICU management</p>
           </div>
         </div>
@@ -164,7 +164,7 @@ export function AuthScreen() {
             <Flame className="size-5" aria-hidden />
           </div>
           <div className="leading-tight">
-            <p className="font-bold tracking-wide">{APP_NAME}</p>
+            <p className="font-bold tracking-tight">{APP_NAME}</p>
             <p className="text-xs text-muted-foreground">Burn assessment &amp; ICU management</p>
           </div>
         </div>

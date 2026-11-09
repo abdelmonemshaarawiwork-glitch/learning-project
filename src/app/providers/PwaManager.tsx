@@ -17,7 +17,7 @@ export function PwaManager() {
 
   useEffect(() => {
     if (offlineReady) {
-      toast.success('BURN TOOL is ready to work offline.');
+      toast.success('BurnMatrix is ready to work offline.');
       setOfflineReady(false);
     }
   }, [offlineReady, setOfflineReady]);

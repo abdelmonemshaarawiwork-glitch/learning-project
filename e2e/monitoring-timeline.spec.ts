@@ -63,5 +63,5 @@ test('reports: complete patient report downloads as PDF', async ({ page }) => {
   const download = page.waitForEvent('download');
   await page.getByTestId('download-report').click();
   const file = await download;
-  expect(file.suggestedFilename()).toMatch(/^burn-tool-complete-BT-.*\.pdf$/);
+  expect(file.suggestedFilename()).toMatch(/^burnmatrix-complete-BT-.*\.pdf$/);
 });

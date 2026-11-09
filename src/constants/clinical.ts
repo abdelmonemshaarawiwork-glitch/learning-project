@@ -9,7 +9,7 @@ import type {
   TimelineEventType,
 } from '@/types/domain';
 
-export const APP_NAME = 'BURN TOOL';
+export const APP_NAME = 'BurnMatrix';
 export const APP_SUBTITLE = 'Advanced Burn Assessment & ICU Management Platform';
 export const APP_VERSION = '1.2.0';
 

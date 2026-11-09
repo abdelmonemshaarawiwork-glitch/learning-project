@@ -45,7 +45,7 @@ test('Lund and Browder assessment: blocked until verified, superficial excluded,
   const download = page.waitForEvent('download');
   await page.getByTestId('download-assessment-pdf').click();
   const file = await download;
-  expect(file.suggestedFilename()).toMatch(/^burn-tool-assessment-BT-.*\.pdf$/);
+  expect(file.suggestedFilename()).toMatch(/^burnmatrix-assessment-BT-.*\.pdf$/);
   const pdf = readFileSync((await file.path())!);
   expect(pdf.subarray(0, 5).toString()).toBe('%PDF-');
   expect(pdf.length).toBeGreaterThan(5000);

@@ -4,6 +4,8 @@ IndexedDB via Dexie 4. Defined in `src/database/db.ts`; versions in `src/databas
 
 ## Databases per account (v1.2)
 
+Internal identifiers (database names, browser-storage keys such as `burn-tool:session`, and the backup `format` values) keep the original `burn-tool` prefix from before the product was renamed **BurnMatrix**, so existing accounts, records and backup files keep working.
+
 | Database | Contents |
 |---|---|
 | `burn-tool-accounts` | One table `accounts` (`id`, `&email`): display name, role, lower-cased email, PBKDF2-SHA-256 hash + 16-byte salt + iteration count (600 000), `dbName`, created / last sign-in, failed-attempt counter, `lockedUntil`. No passwords, no clinical data. Defined in `src/features/auth/accounts.ts`. |
