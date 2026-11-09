@@ -141,3 +141,52 @@ describe('encrypted backup', () => {
     await expect(encryptBackup(backup, 'short')).rejects.toThrow(/at least/);
   });
 });
+
+describe('clinical photos in backups', () => {
+  async function addPhoto(patientId: string) {
+    const { photoRepo } = await import('@/database/repositories/records');
+    const bytes = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5, 250]);
+    return photoRepo.add({
+      patientId,
+      areaId: 'upper-limb-left',
+      view: 'anterior',
+      dateTime: '2026-03-01T09:00:00.000Z',
+      imageData: bytes.buffer.slice(0),
+      mimeType: 'image/jpeg',
+      width: 10,
+      height: 20,
+      annotation: { outlines: [{ id: 'o', segment: 'forearm-left', points: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 1, y: 1 }] }], burns: [], divider: null },
+      consentConfirmed: true,
+      notes: '',
+    });
+  }
+  it('round-trips photo bytes through a backup and cascades on patient delete', async () => {
+    const { a } = await seed();
+    await addPhoto(a.id);
+    const backup = await buildBackup({ scope: 'all' });
+    expect(backup.counts.clinicalPhotos).toBe(1);
+    expect(typeof (backup.tables.clinicalPhotos![0] as { imageBase64: string }).imageBase64).toBe('string');
+    const noPhotos = await buildBackup({ scope: 'all', includePhotos: false });
+    expect(noPhotos.tables.clinicalPhotos).toBeUndefined();
+
+    await resetDatabaseForTests();
+    const analysis = await analyseBackup(JSON.parse(JSON.stringify(backup)));
+    expect(analysis.recordErrors).toEqual([]);
+    await applyBackup(analysis, 'skip-existing');
+    const restored = await db.clinicalPhotos.toArray();
+    expect(restored).toHaveLength(1);
+    expect(Array.from(new Uint8Array(restored[0]!.imageData))).toEqual([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3, 4, 5, 250]);
+
+    const { deletePatient } = await import('@/database/repositories/patients');
+    const counts = await deletePatient(a.id);
+    expect(counts.clinicalPhotos).toBe(1);
+    expect(await db.clinicalPhotos.count()).toBe(0);
+  });
+  it('rejects photos without consent confirmation', async () => {
+    const { a } = await seed();
+    const { photoRepo } = await import('@/database/repositories/records');
+    await expect(
+      photoRepo.add({ patientId: a.id, areaId: 'trunk', view: 'anterior', dateTime: '2026-03-01T09:00:00.000Z', imageData: new ArrayBuffer(4), mimeType: 'image/jpeg', width: 1, height: 1, annotation: { outlines: [], burns: [], divider: null }, consentConfirmed: false as true, notes: '' }),
+    ).rejects.toThrow(/consentConfirmed/);
+  });
+});

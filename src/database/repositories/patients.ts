@@ -76,6 +76,7 @@ export interface RelatedCounts {
   outputRecords: number;
   clinicalObservations: number;
   timelineEvents: number;
+  clinicalPhotos: number;
 }
 
 export async function countRelatedRecords(patientId: string): Promise<RelatedCounts> {

@@ -51,6 +51,7 @@ export const router = createBrowserRouter([
       { path: 'patients/:id', element: page(() => import('@/features/patients/PatientProfilePage')) },
       { path: 'patients/:id/edit', element: page(() => import('@/features/patients/PatientFormPage')) },
       { path: 'assessment', element: page(() => import('@/features/burn-assessment/AssessmentWorkflowPage')) },
+      { path: 'assessment/photos', element: page(() => import('@/features/photo-assessment/PhotoAssessmentPage')) },
       { path: 'assessment/history', element: page(() => import('@/features/burn-assessment/AssessmentHistoryPage')) },
       { path: 'assessment/:id', element: page(() => import('@/features/burn-assessment/AssessmentDetailPage')) },
       { path: 'body-map', element: page(() => import('@/features/body-mapping/BodyMappingPage')) },

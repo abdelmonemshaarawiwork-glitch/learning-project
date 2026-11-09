@@ -1,5 +1,5 @@
 import { useLiveQuery } from 'dexie-react-hooks';
-import { ArrowRight, ClipboardList, Copy, PersonStanding } from 'lucide-react';
+import { ArrowRight, Camera, ClipboardList, Copy, PersonStanding } from 'lucide-react';
 import { useMemo } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { PageHeader } from '@/components/common/PageHeader';
@@ -109,6 +109,11 @@ export default function BodyMappingPage() {
                 )}
                 <Button variant="ghost" asChild>
                   <Link to={`/assessment?patient=${active.patient.id}`}>Open workflow</Link>
+                </Button>
+                <Button variant="ghost" asChild>
+                  <Link to={`/assessment/photos?patient=${active.patient.id}`}>
+                    <Camera /> Estimate from photos
+                  </Link>
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">

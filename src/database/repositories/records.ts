@@ -1,6 +1,7 @@
 /** Repositories for patient-linked time-series records. */
 import { db } from '@/database/db';
 import {
+  clinicalPhotoSchema,
   fluidCalculationSchema,
   intakeRecordSchema,
   observationSchema,
@@ -10,6 +11,7 @@ import {
 } from '@/database/validation';
 import type {
   ClinicalObservation,
+  ClinicalPhoto,
   FluidCalculationRecord,
   IntakeRecord,
   OutputRecord,
@@ -71,6 +73,7 @@ export const intakeRepo = makeRepo<IntakeRecord>(() => db.intakeRecords, intakeR
 export const outputRepo = makeRepo<OutputRecord>(() => db.outputRecords, outputRecordSchema, 'outputRecord');
 export const observationRepo = makeRepo<ClinicalObservation>(() => db.clinicalObservations, observationSchema, 'observation');
 export const timelineRepo = makeRepo<TimelineEvent>(() => db.timelineEvents, timelineEventSchema, 'timelineEvent');
+export const photoRepo = makeRepo<ClinicalPhoto>(() => db.clinicalPhotos, clinicalPhotoSchema, 'clinicalPhoto');
 
 export async function saveFluidCalculation(input: Omit<FluidCalculationRecord, 'id' | 'createdAt'>): Promise<FluidCalculationRecord> {
   const now = nowIso();

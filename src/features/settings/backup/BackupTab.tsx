@@ -44,6 +44,7 @@ const TABLE_LABEL: Record<string, string> = {
   referenceDatasets: 'Reference datasets',
   settings: 'Settings',
   auditEvents: 'Audit events',
+  clinicalPhotos: 'Clinical photos',
 };
 
 export function BackupTab() {
@@ -62,6 +63,7 @@ function ExportCard() {
   const [scope, setScope] = useState<'all' | 'patients'>('all');
   const [selected, setSelected] = useState<string[]>([]);
   const [encrypt, setEncrypt] = useState(false);
+  const [includePhotos, setIncludePhotos] = useState(true);
   const [password, setPassword] = useState('');
   const [confirm, setConfirm] = useState('');
   const [busy, setBusy] = useState(false);
@@ -71,7 +73,7 @@ function ExportCard() {
   async function exportNow() {
     setBusy(true);
     try {
-      const backup = await buildBackup(scope === 'all' ? { scope: 'all' } : { scope: 'patients', patientIds: selected });
+      const backup = await buildBackup(scope === 'all' ? { scope: 'all', includePhotos } : { scope: 'patients', patientIds: selected, includePhotos });
       const payload = encrypt ? await encryptBackup(backup, password) : backup;
       const stamp = nowIso().slice(0, 16).replace(/[:T]/g, '');
       downloadBlob(new Blob([JSON.stringify(payload)], { type: 'application/json' }), `burn-tool-backup-${scope}-${stamp}${encrypt ? '.encrypted' : ''}.json`);
@@ -138,6 +140,10 @@ function ExportCard() {
             ))}
           </div>
         )}
+        <label className="flex items-center gap-2 text-sm">
+          <Checkbox checked={includePhotos} onChange={(e) => setIncludePhotos(e.target.checked)} data-testid="backup-include-photos" />
+          Include clinical photographs (larger file; photos are identifiable data)
+        </label>
         <label className="flex items-center gap-2 text-sm">
           <Checkbox checked={encrypt} onChange={(e) => setEncrypt(e.target.checked)} data-testid="encrypt-backup" />
           <KeyRound className="size-4" /> Encrypt the backup file with a password (AES-GCM 256, PBKDF2-SHA-256)

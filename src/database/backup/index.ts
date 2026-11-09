@@ -12,9 +12,9 @@ import { z } from 'zod';
 import { APP_VERSION } from '@/constants/clinical';
 import { ALL_TABLES, db, PATIENT_TABLES, type TableName } from '@/database/db';
 import { CURRENT_SCHEMA_VERSION } from '@/database/migrations';
-import { formatZodError, TABLE_SCHEMAS } from '@/database/validation';
+import { clinicalPhotoBackupSchema, formatZodError, TABLE_SCHEMAS } from '@/database/validation';
 import { canonicalJson, sha256Hex } from '@/engines/integrity';
-import type { Assessment, FluidCalculationRecord, Patient, TimelineEvent } from '@/types/domain';
+import type { Assessment, ClinicalPhoto, FluidCalculationRecord, Patient, TimelineEvent } from '@/types/domain';
 import { nowIso } from '@/utils/dates';
 import { generatePatientCode, newId } from '@/utils/ids';
 import { audit } from '@/database/repositories/audit';
@@ -55,7 +55,24 @@ export interface EncryptedBackupFile {
 /* Export                                                              */
 /* ------------------------------------------------------------------ */
 
-export async function buildBackup(options: { scope: 'all' } | { scope: 'patients'; patientIds: string[] }): Promise<BackupFile> {
+/** Photos are stored as bytes; in backup files they are base64 strings. */
+function photoToBackup(p: ClinicalPhoto) {
+  const { imageData, ...rest } = p;
+  return { ...rest, imageBase64: toBase64(new Uint8Array(imageData)) };
+}
+
+function photoFromBackup(r: Record<string, unknown>): ClinicalPhoto {
+  const { imageBase64, ...rest } = r as { imageBase64: string } & Record<string, unknown>;
+  const bytes = fromBase64(imageBase64);
+  return { ...(rest as unknown as Omit<ClinicalPhoto, 'imageData'>), imageData: bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) };
+}
+
+export interface BackupOptions {
+  /** Include clinical photographs (default true). */
+  includePhotos?: boolean;
+}
+
+export async function buildBackup(options: ({ scope: 'all' } | { scope: 'patients'; patientIds: string[] }) & BackupOptions): Promise<BackupFile> {
   const tables: Partial<Record<BackupTable, unknown[]>> = {};
   let patientIds: string[] = [];
   await db.transaction('r', BACKUP_TABLES.map((t) => db.table(t)), async () => {
@@ -75,6 +92,8 @@ export async function buildBackup(options: { scope: 'all' } | { scope: 'patients
       tables.fluidProtocols = (await db.fluidProtocols.bulkGet([...protoIds])).filter(Boolean);
     }
   });
+  if (options.includePhotos === false) delete tables.clinicalPhotos;
+  else if (tables.clinicalPhotos) tables.clinicalPhotos = (tables.clinicalPhotos as ClinicalPhoto[]).map(photoToBackup);
   const counts = Object.fromEntries(Object.entries(tables).map(([k, v]) => [k, v?.length ?? 0])) as BackupFile['counts'];
   return {
     format: BACKUP_FORMAT,
@@ -259,7 +278,7 @@ export async function analyseBackup(raw: unknown): Promise<BackupAnalysis> {
   for (const t of BACKUP_TABLES) {
     const rows = backup.tables[t];
     if (!rows) continue;
-    const schema = TABLE_SCHEMAS[t] as z.ZodType;
+    const schema = (t === 'clinicalPhotos' ? clinicalPhotoBackupSchema : TABLE_SCHEMAS[t]) as z.ZodType;
     const ok: unknown[] = [];
     const seen = new Set<string>();
     rows.forEach((row, index) => {
@@ -374,8 +393,10 @@ export async function applyBackup(analysis: BackupAnalysis, strategy: ImportStra
 
   await db.transaction('rw', BACKUP_TABLES.map((t) => db.table(t)), async () => {
     for (const t of BACKUP_TABLES) {
-      const rows = data[t];
-      if (!rows?.length) continue;
+      const rawRows = data[t];
+      if (!rawRows?.length) continue;
+      // Convert without mutating the analysis (so a failed import can be retried).
+      const rows = t === 'clinicalPhotos' ? rawRows.map((r) => photoFromBackup(r as Record<string, unknown>)) : rawRows;
       const table = db.table(t);
       if (t === 'auditEvents') {
         const existing = new Set((await db.auditEvents.toArray()).map((a) => `${a.timestamp}|${a.action}|${a.entityId}`));

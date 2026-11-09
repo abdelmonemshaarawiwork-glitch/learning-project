@@ -1,7 +1,7 @@
 import Dexie from 'dexie';
 import { beforeEach, describe, expect, it } from 'vitest';
 import { BurnToolDB, db, resetDatabaseForTests } from './db';
-import { SCHEMA_V1_STORES } from './migrations';
+import { CURRENT_SCHEMA_VERSION, SCHEMA_V1_STORES } from './migrations';
 import { ensureBundledTemplates } from './bootstrap';
 import { createPatient, deletePatient, findPotentialDuplicates, updatePatient } from './repositories/patients';
 import { deleteAssessment, getAssessmentWithRegions, listAssessmentsForPatient, saveAssessment, type NewAssessment } from './repositories/assessments';
@@ -201,7 +201,7 @@ describe('migrations', () => {
 
     const upgraded = new BurnToolDB(name);
     await upgraded.open();
-    expect(upgraded.verno).toBe(2);
+    expect(upgraded.verno).toBe(CURRENT_SCHEMA_VERSION);
     const p = await upgraded.patients.get('p1');
     expect(p?.name).toBe('Test Patient');
     expect(p?.mechanismDetails).toBe('');
@@ -217,7 +217,7 @@ describe('migrations', () => {
 describe('schema', () => {
   it('declares all required tables with indexes', async () => {
     const { CURRENT_STORES } = await import('./schema');
-    for (const t of ['patients', 'assessments', 'assessmentRegions', 'fluidProtocols', 'fluidCalculations', 'intakeRecords', 'outputRecords', 'clinicalObservations', 'timelineEvents', 'referenceDatasets', 'settings', 'auditEvents', 'drafts'])
+    for (const t of ['patients', 'assessments', 'assessmentRegions', 'fluidProtocols', 'fluidCalculations', 'intakeRecords', 'outputRecords', 'clinicalObservations', 'timelineEvents', 'referenceDatasets', 'settings', 'auditEvents', 'drafts', 'clinicalPhotos'])
       expect(CURRENT_STORES[t], t).toBeDefined();
     expect(CURRENT_STORES.clinicalObservations).toContain('[patientId+parameter]');
     expect(db.tables.map((t) => t.name).sort()).toEqual(Object.keys(CURRENT_STORES).sort());

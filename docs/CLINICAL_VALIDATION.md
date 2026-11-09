@@ -37,7 +37,9 @@ Using independent worked examples (spreadsheet or hand calculation reviewed by a
 
 - [ ] Assessment workflow tested by representative clinicians on desktop, tablet and phone.
 - [ ] 2D map orientation (R/L = patient's right/left) understood by users.
-- [ ] 3D viewer: the development mannequin is **not anatomically accurate** — decide whether to use it, disable it (Settings → prefer 2D map) or integrate a licensed, reviewed anatomical model (`public/models/README.md`).
+- [ ] 3D viewer: review the automatically generated region boundaries of the bundled MakeHuman (CC0) model against the Lund and Browder chart — especially shoulder/upper arm, axilla, groin/thigh, buttock (gluteal fold), genital/perineal region, wrist/hand, ankle/foot and the anterior/posterior split along the sides. Set `anatomicallyReviewed: true` in `public/models/manifest.json` only after review, or prefer the 2D map (Settings) until then.
+- [ ] Photo-assisted estimate: compare proposed involvement with independent clinical estimates on a test set (phantoms or consented images); quantify agreement for each view combination; agree local photography technique (distance, angle, lighting, positioning); confirm the pooling rule (MEDICAL_CALCULATIONS §8) is acceptable; confirm that clinicians review every proposed value before applying it.
+- [ ] Clinical photography governance: consent process, storage on shared devices, retention, inclusion of photos in backups, and deletion.
 - [ ] Reports reviewed for content, legibility and correct patient identification.
 - [ ] Error messages understood; NOT CONFIGURED states understood.
 

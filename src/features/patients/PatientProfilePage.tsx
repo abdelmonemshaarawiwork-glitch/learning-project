@@ -313,6 +313,7 @@ export default function PatientProfilePage() {
                 `${deleteCounts.intakeRecords} intake and ${deleteCounts.outputRecords} output record(s)`,
                 `${deleteCounts.clinicalObservations} observation(s)`,
                 `${deleteCounts.timelineEvents} timeline event(s)`,
+                `${deleteCounts.clinicalPhotos} clinical photo(s)`,
               ]
             : []
         }

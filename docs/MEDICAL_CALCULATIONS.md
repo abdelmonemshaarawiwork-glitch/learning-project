@@ -105,3 +105,30 @@ User-configured only (none shipped). For an enabled threshold with matching para
 ## 7. Attention flags (`features/dashboard/attention.ts`)
 
 Data-quality flags (indeterminate depth, unconfigured references) are on by default. Numeric rules (TBSA ≥ X, no assessment within N h, no I/O within N h) have **no default value** and are inactive until a value is entered. Observation and urine flags use only configured thresholds / verified targets. Every flag displays its rule.
+
+## 8. Photo-assisted planimetry (`engines/photo-planimetry`)
+
+**What it is:** a measuring aid for areas the clinician has traced on photographs. **What it is not:** automatic burn detection — no pixel colour, texture or AI analysis is performed and burn depth is always chosen by the clinician.
+
+Per area (each upper limb, each lower limb, trunk, head & neck) the clinician takes up to four views — front (anterior), back (posterior) and both sides (medial/lateral for limbs; patient's left/right for trunk and head) — and on each photo traces:
+
+1. the **outline of each body segment** visible (e.g. upper arm, forearm, hand),
+2. each **burned area** with an explicitly chosen depth,
+3. on side views, a **divider** between the anterior and posterior halves, and taps the anterior side.
+
+**Measurement (per photo).** Polygons are rasterised on a grid whose long side is 400 cells (pixel-centre sampling, even-odd rule). Overlapping outlines → first-drawn segment; overlapping burns → counted once with the most severe depth (both reported). Burn area outside every outline is ignored and reported. A front photo measures only anterior surfaces and a back photo only posterior surfaces; single-surface segments (buttocks = posterior, genitalia = anterior) are assigned to their only surface. Side views are split by the divider.
+
+**Pooling across views (heuristic, documented choice).** Each photo counts as one unit of the segment's visible area, which makes the result independent of camera distance. For surface *S* and depth *d*:
+
+```
+u_i      = part area of segment in photo i that belongs to S ÷ segment area in photo i   (direct view ≈ 1, side half ≈ 0.5)
+f_i,d    = burned area of depth d in that part ÷ part area
+F_d(S)   = Σ u_i · f_i,d  ÷  Σ u_i
+proposed involvement(S, d) = 100 · F_d(S)   (1 decimal; independent rounding is corrected so the sum never exceeds 100 %)
+```
+
+Example: front view 40 % burned; lateral view, anterior half fully burned → F = (0.4·1 + 1·0.5)/(1 + 0.5) = 0.6 → 60 %.
+
+The results table shows, for every region surface, the proposed % per depth, the per-view values and whether a direct view exists. After review and explicit confirmation, selected rows replace the entries of those region surfaces in a **Lund and Browder** draft (Rule of Nines regions are coarser than the traced segments and are not supported). The normal TBSA engine then applies the verified dataset percentages, depth rules and validation.
+
+**Limitations:** photographs are 2D projections of curved surfaces (edges are foreshortened; adjacent views overlap); lighting, skin tone, dressings, blood and blisters affect visibility; tracing accuracy depends on the user and zoom level; the pooling rule is a geometric heuristic, not a validated clinical method.

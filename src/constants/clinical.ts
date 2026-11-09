@@ -11,7 +11,7 @@ import type {
 
 export const APP_NAME = 'BURN TOOL';
 export const APP_SUBTITLE = 'Advanced Burn Assessment & ICU Management Platform';
-export const APP_VERSION = '1.0.0';
+export const APP_VERSION = '1.1.0';
 
 export const CLINICAL_DISCLAIMER =
   'Clinical decision-support software. All calculations and outputs require review by a qualified healthcare professional. This software is not a substitute for clinical judgment.';

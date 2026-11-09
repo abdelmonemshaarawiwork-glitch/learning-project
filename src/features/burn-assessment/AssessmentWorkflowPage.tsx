@@ -1,4 +1,4 @@
-import { ArrowLeft, ArrowRight, Check, ClipboardList, Droplets, FileDown, History, Save, Trash2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Camera, Check, ClipboardList, Droplets, FileDown, History, Save, Trash2 } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { toast } from 'sonner';
@@ -99,11 +99,18 @@ export default function AssessmentWorkflowPage() {
         title="Burn assessment"
         description="Regional TBSA estimation with Lund and Browder, Rule of Nines or the Palm method. Previous assessments are never overwritten."
         actions={
-          <Button variant="outline" asChild>
-            <Link to={`/assessment/history${active.patient ? `?patient=${active.patient.id}` : ''}`}>
-              <History /> History &amp; comparison
-            </Link>
-          </Button>
+          <>
+            <Button variant="outline" asChild>
+              <Link to={`/assessment/photos${active.patient ? `?patient=${active.patient.id}` : ''}`} data-testid="open-photo-estimate">
+                <Camera /> Photo-assisted estimate
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link to={`/assessment/history${active.patient ? `?patient=${active.patient.id}` : ''}`}>
+                <History /> History &amp; comparison
+              </Link>
+            </Button>
+          </>
         }
       />
 
@@ -465,6 +472,16 @@ function DraftSteps({ draft, patient, datasets, onSaved }: { draft: AssessmentDr
           <Alert variant="danger" className="mb-4" title="Method not ready">
             Return to step 3: the reference dataset or palm value is not configured.
           </Alert>
+        )}
+        {draft.method === 'lund-browder' && (
+          <div className="mb-4 flex flex-col gap-2 rounded-xl border bg-card px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+            <span className="text-muted-foreground">Have photos of the burns? Trace them to get proposed involvement for each region surface.</span>
+            <Button variant="outline" size="sm" asChild>
+              <Link to={`/assessment/photos?patient=${patient.id}`}>
+                <Camera /> Estimate from photos
+              </Link>
+            </Button>
+          </div>
         )}
         <RegionMappingPanel draft={draft} dataset={dataset} result={result} />
         <StepNav step={draft.step} canNext={methodReady} onBack={() => go(2)} onNext={() => go(4)} nextLabel="Review" />

@@ -66,6 +66,13 @@ export const SCHEMA_VERSIONS: SchemaVersion[] = [
         });
     },
   },
+  {
+    version: 3,
+    description: 'Adds the clinicalPhotos table (photo-assisted planimetry). No existing data is changed.',
+    stores: {
+      clinicalPhotos: 'id, patientId, [patientId+dateTime], [patientId+areaId], areaId',
+    },
+  },
 ];
 
 export const CURRENT_SCHEMA_VERSION = SCHEMA_VERSIONS[SCHEMA_VERSIONS.length - 1]!.version;

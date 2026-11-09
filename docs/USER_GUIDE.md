@@ -33,7 +33,25 @@ The draft is saved automatically on this device and can be continued later or di
 
 ## 3D body mapping
 
-Drag to rotate, scroll/pinch to zoom, right-drag/two-finger drag to pan; **Anterior / Posterior / Left lateral / Right lateral / Reset**. Without a draft it shows the latest saved assessment; start or continue an assessment to edit regions here. The bundled model is a schematic development mannequin and is labelled as not anatomically accurate. If WebGL is unavailable, the 2D map is used.
+Drag to rotate, scroll/pinch to zoom, right-drag/two-finger drag to pan; **Anterior / Posterior / Left lateral / Right lateral / Reset**. Tap a region to select it (a drag rotates instead). Without a draft it shows the latest saved assessment; start or continue an assessment to edit regions here.
+
+The model is a realistic human body (MakeHuman base mesh, CC0) divided into the Lund and Browder regions. The region boundaries were generated automatically and **have not been clinically reviewed** — always check the region name shown in the editor after tapping. If the model cannot load, a schematic mannequin is shown (labelled as not anatomically accurate); without WebGL the 2D map is used.
+
+## Photo-assisted estimate
+
+*Burn Assessment → Photo-assisted estimate* (also from step 4–6 of the workflow and from 3D body mapping).
+
+1. Select the patient and confirm that consent for clinical photography has been obtained (or is covered by local policy).
+2. Choose an area — left/right upper limb, left/right lower limb, trunk, head & neck — and for each view (front, back, and both sides) tap **Take photo** (opens the camera) or **Choose**. Follow the capture tips: camera perpendicular, whole segment in frame with its boundaries (shoulder, elbow, wrist…), even light, similar distance for every view.
+3. **Trace** each photo:
+   * *Outline segment* — pick the segment (e.g. Left forearm) and trace its whole visible outline. Repeat for each segment in the photo.
+   * *Trace burn* — choose the depth first, then trace each burned area of that depth (indeterminate is allowed).
+   * Side views: *Divider* — drag a line separating the front half from the back half, then tap the front (anterior) side.
+   * Zoom (+/−) and *Pan* help with small areas; *Undo/Redo* and the shape list let you correct mistakes. Tracing saves automatically.
+4. **Proposed involvement** shows, for each region surface, the % per depth pooled from all traced views, the value from each view, and a warning when there is no direct front/back view.
+5. Untick any row you do not want, then **Start Lund and Browder draft** (if none) → **Review & apply**. Applied rows replace the draft's entries for those region surfaces; other entries are kept. Continue in the assessment workflow to review, edit and save.
+
+The app never detects burns or depth itself and the method is not clinically validated: always compare with your examination. Photos are stored only on this device (location metadata removed), can be deleted individually and are deleted with the patient. Backups include photos unless you untick *Include clinical photographs*.
 
 ## Fluid management
 

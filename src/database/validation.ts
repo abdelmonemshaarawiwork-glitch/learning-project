@@ -242,6 +242,32 @@ export const timelineEventSchema = z.object({
   updatedAt: iso,
 });
 
+const normPoint = z.object({ x: finite, y: finite });
+export const photoAnnotationSchema = z.object({
+  outlines: z.array(z.object({ id: z.string(), segment: z.string().min(1), points: z.array(normPoint) })),
+  burns: z.array(z.object({ id: z.string(), depth: depthSchema, points: z.array(normPoint) })),
+  divider: z.object({ a: normPoint, b: normPoint, anteriorPoint: normPoint.nullable() }).nullable(),
+});
+const photoBase = {
+  id: z.string().min(1),
+  patientId: z.string().min(1),
+  areaId: z.enum(['upper-limb-left', 'upper-limb-right', 'lower-limb-left', 'lower-limb-right', 'trunk', 'head-neck']),
+  view: z.enum(['anterior', 'posterior', 'medial', 'lateral', 'left-side', 'right-side']),
+  dateTime: iso,
+  mimeType: z.string().regex(/^image\/(jpeg|png|webp)$/),
+  width: z.number().int().positive(),
+  height: z.number().int().positive(),
+  annotation: photoAnnotationSchema,
+  consentConfirmed: z.literal(true),
+  notes: z.string(),
+  createdAt: iso,
+  updatedAt: iso,
+};
+const isArrayBuffer = (v: unknown) => Object.prototype.toString.call(v) === '[object ArrayBuffer]';
+export const clinicalPhotoSchema = z.object({ ...photoBase, imageData: z.custom<ArrayBuffer>(isArrayBuffer, { message: 'Image data missing' }) });
+/** Backup representation: image bytes as base64. */
+export const clinicalPhotoBackupSchema = z.object({ ...photoBase, imageBase64: z.string().min(1) });
+
 export const settingSchema = z.object({ id: z.string().min(1), key: z.string().min(1), value: z.unknown(), updatedAt: iso });
 
 export const auditEventSchema = z.object({
@@ -269,6 +295,7 @@ export const TABLE_SCHEMAS = {
   settings: settingSchema,
   auditEvents: auditEventSchema,
   drafts: draftSchema,
+  clinicalPhotos: clinicalPhotoSchema,
 } as const;
 
 export function formatZodError(error: z.ZodError): string {

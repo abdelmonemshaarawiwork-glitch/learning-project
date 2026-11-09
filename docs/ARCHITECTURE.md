@@ -22,14 +22,16 @@ src/
     patients/         list, form (RHF + Zod), profile
     burn-assessment/  workflow, history/compare, detail, service.ts, components/ (editors, summaries, mapping panel)
     body-mapping/     BodyMap2D + geometry2d, BodyViewer3D (R3F), BodyMapSwitcher, model3d/ (mannequin, manifest)
+    photo-assessment/ PhotoAssessmentPage, PhotoAnnotator (tracing), imageProcessing, photoAreas
     fluid-management/ intake-output/ urine-output/ clinical-monitoring/ timeline/
     reports/          ReportsPage, reportTypes, pdf/ (builder, sections, reportData, runReport)
     settings/         tabs: preferences, references, protocols, urine targets, thresholds, flags, backup/, data, about
   database/           db.ts, schema.ts, migrations/, repositories/, validation.ts (Zod), backup/, bootstrap.ts
-  engines/            tbsa/, fluids/, urine-output/, fluid-balance/, thresholds/, integrity/
+  engines/            tbsa/, fluids/, urine-output/, fluid-balance/, thresholds/, integrity/, photo-planimetry/
   reference-data/     bundled templates (NOT CONFIGURED)
   constants/ hooks/ stores/ types/ utils/ styles/ tests/
-public/  icons/ models/ (3D asset slot + README) favicon.svg
+public/  icons/ models/ (MakeHuman CC0 GLB, manifest, licence, README) favicon.svg
+scripts/ generate-icons.mjs, build-anatomical-model.mjs
 e2e/     Playwright specs
 ```
 
@@ -60,8 +62,10 @@ bundled template ──ensureBundledTemplates──► NOT CONFIGURED ──clin
 
 * `BodyViewer3D` (lazy chunk `vendor-3d`) renders with React Three Fiber, Drei `OrbitControls` (rotate, zoom, pan; mouse and touch), camera presets (anterior, posterior, left/right lateral) and reset. Clicks are ignored when the pointer moved (drag ≠ tap).
 * **Body segments** (`constants/clinical.ts`) are the shared vocabulary of the 2D map, the 3D model and the datasets (each dataset row lists the segments it covers, so Rule of Nines "upper limb" highlights arm, forearm and hand).
-* **Licensed model:** if `public/models/manifest.json` exists and validates (`model3d/modelManifest.ts`: file, licence with attribution and redistribution permission, mesh → segment map, forward axis, scale), the GLB is loaded with `useGLTF` (no Draco/CDN). Meshes without an explicit surface use the face normal vs. the forward axis. See `public/models/README.md`.
-* **Development mannequin:** otherwise a procedural lathe-surface mannequin (`model3d/mannequin.ts`) is used with one mesh per segment surface. It is labelled in the UI as *not anatomically accurate*.
+* **Bundled realistic model:** `public/models/makehuman-body.glb` is built by `scripts/build-anatomical-model.mjs` from the **CC0** MakeHuman base mesh (hm08) and its default skeleton weights (sources and SHA-256 hashes recorded in `manifest.json → provenance`). Pipeline: every vertex is assigned to its highest-weight bone → bones map to body segments; buttocks and genitalia/perineum are carved from the pelvic region by geometric rules; anterior/posterior is decided per original quad from its normal (+Z for head, neck, trunk, upper arm and lower limb; the palm direction, derived from thumb and finger positions, for the hand; a blend from the arm's front at the elbow to the palm at the wrist for the forearm; dorsum vs. sole/heel for the foot); labels are smoothed over face adjacency. Result: one mesh per segment surface (33) plus non-selectable eyes, ~0.57 MB. The manifest marks `anatomicallyReviewed: false`; the viewer says so.
+* **Loading:** `model3d/modelManifest.ts` validates `manifest.json` (file, licence with attribution and redistribution permission, mesh → segment map, forward axis). The GLB is loaded with Drei `useGLTF` with Draco **and Meshopt disabled** (no CDN, no WebAssembly — the CSP forbids both). If loading fails, an error boundary inside the canvas switches to the development mannequin. Replacing the model = new GLB + manifest (see `public/models/README.md`).
+* **Selection:** taps are detected with native pointer events and an explicit raycast (≤ 6 px movement = tap, otherwise rotate/pan), with sub-pixel retries so a ray exactly on a mesh seam (the body midline) still hits. Hover uses R3F events. The viewer exposes `data-model-ready`, `data-camera-view` and `data-camera-settled` for tests.
+* **Development mannequin:** procedural lathe-surface mannequin (`model3d/mannequin.ts`), one mesh per segment surface, labelled *not anatomically accurate*; used only as a fallback.
 * **Fallback:** `BodyMapSwitcher` detects WebGL; without it (or if the 3D view throws) the accessible 2D SVG map is shown. The 2D map is keyboard-operable.
 
 ## PWA & offline
@@ -70,6 +74,12 @@ bundled template ──ensureBundledTemplates──► NOT CONFIGURED ──clin
 * Registration is `prompt`-type: an update notice appears and the page is only reloaded when the user clicks *Reload*.
 * `useOnlineStatus` drives the offline indicator; all features work offline (nothing needs the network).
 * `navigator.storage.persist()` is requested at start-up; status is shown in Settings → Data management.
+
+## Photo-assisted estimate
+
+* Capture via `<input type="file" accept="image/*" capture="environment">` (opens the camera on phones/tablets; works offline) or the gallery. `imageProcessing.ts` honours EXIF orientation, downsizes to ≤ 1600 px and re-encodes to JPEG (removes EXIF/GPS). Consent confirmation is required before capture and stored on each photo.
+* `PhotoAnnotator` draws on an SVG overlay in normalised coordinates (freehand trace → Ramer–Douglas–Peucker simplification), with zoom/pan, undo/redo and a shape list; tracing is auto-saved (debounced) to `clinicalPhotos`.
+* `engines/photo-planimetry` rasterises shapes, measures each photo and pools views (formula in MEDICAL_CALCULATIONS §8). Proposed rows are applied to the shared assessment draft (Lund and Browder only) after explicit confirmation; the normal TBSA engine and verification gate then apply.
 
 ## Reports
 

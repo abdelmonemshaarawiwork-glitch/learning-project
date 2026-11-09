@@ -336,6 +336,31 @@ export interface TimelineEvent {
 }
 
 /* ------------------------------------------------------------------ */
+/* Clinical photographs (photo-assisted planimetry)                    */
+/* ------------------------------------------------------------------ */
+
+export type PhotoAreaId = 'upper-limb-left' | 'upper-limb-right' | 'lower-limb-left' | 'lower-limb-right' | 'trunk' | 'head-neck';
+
+export interface ClinicalPhoto {
+  id: string;
+  patientId: string;
+  areaId: PhotoAreaId;
+  view: import('@/engines/photo-planimetry').PhotoView;
+  /** When the photograph was taken. */
+  dateTime: ISODateTime;
+  /** Re-encoded JPEG bytes (EXIF/location metadata removed by re-encoding). */
+  imageData: ArrayBuffer;
+  mimeType: string;
+  width: number;
+  height: number;
+  annotation: import('@/engines/photo-planimetry').PhotoAnnotation;
+  consentConfirmed: boolean;
+  notes: string;
+  createdAt: ISODateTime;
+  updatedAt: ISODateTime;
+}
+
+/* ------------------------------------------------------------------ */
 /* Settings, audit, drafts                                             */
 /* ------------------------------------------------------------------ */
 

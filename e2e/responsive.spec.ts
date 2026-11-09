@@ -6,7 +6,7 @@ const VIEWPORTS = [
   { name: 'tablet', width: 820, height: 1180, touch: true },
   { name: 'desktop', width: 1280, height: 800, touch: false },
 ];
-const ROUTES = ['/', '/patients', '/patients/new', '/assessment', '/assessment/history', '/body-map', '/fluids', '/intake-output', '/intake-output/urine-output', '/monitoring', '/timeline', '/reports', '/settings', '/settings?tab=references', '/settings?tab=backup'];
+const ROUTES = ['/', '/patients', '/patients/new', '/assessment', '/assessment/history', '/assessment/photos', '/body-map', '/fluids', '/intake-output', '/intake-output/urine-output', '/monitoring', '/timeline', '/reports', '/settings', '/settings?tab=references', '/settings?tab=backup'];
 
 for (const vp of VIEWPORTS) {
   test(`${vp.name}: no horizontal overflow on any route`, async ({ browser }) => {

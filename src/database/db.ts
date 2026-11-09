@@ -4,6 +4,7 @@ import type {
   AssessmentRegion,
   AuditEvent,
   ClinicalObservation,
+  ClinicalPhoto,
   DraftRecord,
   FluidCalculationRecord,
   FluidProtocol,
@@ -32,6 +33,7 @@ export class BurnToolDB extends Dexie {
   settings!: EntityTable<SettingRecord, 'id'>;
   auditEvents!: EntityTable<AuditEvent, 'id'>;
   drafts!: EntityTable<DraftRecord, 'id'>;
+  clinicalPhotos!: EntityTable<ClinicalPhoto, 'id'>;
 
   constructor(name = DB_NAME) {
     super(name);
@@ -51,6 +53,7 @@ export const PATIENT_TABLES = [
   'outputRecords',
   'clinicalObservations',
   'timelineEvents',
+  'clinicalPhotos',
 ] as const;
 export type PatientTableName = (typeof PATIENT_TABLES)[number];
 

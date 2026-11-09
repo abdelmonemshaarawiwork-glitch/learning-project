@@ -17,7 +17,8 @@ Every clinical reference (Lund and Browder, Rule of Nines, palm values, urine-ou
 | Dashboard | Live counts, 14-day activity chart, latest-TBSA chart, recent assessments / events / fluid records, configurable attention flags (each shows its rule), backup reminder, quick actions |
 | Patients | Create / edit / delete (typed confirmation, cascade), search, filter, sort, duplicate warning, profile with assessments, fluids, I/O, observations, timeline, report and JSON export |
 | Burn assessment | 10-step workflow; Lund and Browder (age columns), Rule of Nines (adult, paediatric limitation acknowledgement), Palm method (clinician-entered palm %); five depths; superficial excluded; indeterminate reported separately with upper bound; validation; history, amendment (never overwrites) and comparison |
-| 3D body mapping | React Three Fiber viewer: rotate / zoom / pan (mouse & touch), anterior / posterior / lateral views, reset, region selection, colour overlays; licensed-model integration via `public/models/manifest.json`; clearly labelled development mannequin; 2D map fallback without WebGL |
+| 3D body mapping | Realistic human body model (MakeHuman base mesh, **CC0**) segmented into the 33 Lund and Browder region surfaces; rotate / zoom / pan (mouse & touch), anterior / posterior / lateral views, reset, tap-to-select, hover, colour overlays. Region boundaries are approximate and flagged as not clinically reviewed. Falls back to a labelled schematic mannequin if the model cannot load, and to the 2D map without WebGL |
+| Photo-assisted estimate | Photograph each area (both limbs, trunk, head & neck) from front, back and both sides; the clinician traces segment outlines, burned areas with their depth, and an anterior/posterior divider on side views; the app measures the traced areas, pools the views and proposes % involvement per region surface, which can be applied to a Lund and Browder draft after review. **No automatic burn or depth detection.** Photos stay on the device (re-encoded, EXIF/GPS removed) |
 | Fluid management | Verified-protocol estimates: formula, total, phase windows, time since injury vs. since resuscitation, administered (from intake records), remaining, schedule chart, assumptions, snapshots |
 | Intake & output | Hourly records, daily totals, cumulative intake/output/balance, charts, interval filter, edit / delete |
 | Urine output | mL/kg/h calculator with validation; labels results only against a verified age-specific target |
@@ -44,6 +45,7 @@ npm run build               # type-check + production build into dist/ (incl. se
 npm run preview             # serve the production build (http://localhost:4173)
 npm run test:e2e            # Playwright end-to-end tests (builds and serves automatically)
 npm run icons               # regenerate PWA icons from SVG
+npm run model -- <dir>      # rebuild public/models from the MakeHuman CC0 sources (see public/models/README.md)
 ```
 
 `npm run test:e2e` uses Chromium. If Playwright browsers are not installed on your machine, run `npx playwright install chromium` first.
@@ -82,6 +84,7 @@ Data is stored per browser and per device. Installing on a second device does **
 * [docs/REFERENCES.md](docs/REFERENCES.md) — bundled reference datasets and their sources
 * [docs/CLINICAL_VALIDATION.md](docs/CLINICAL_VALIDATION.md) — checklist required before clinical use
 * [docs/USER_GUIDE.md](docs/USER_GUIDE.md) — how to use each module
+* [public/models/README.md](public/models/README.md) — the bundled 3D model, its licence and how to rebuild or replace it
 
 ## Technology
 
