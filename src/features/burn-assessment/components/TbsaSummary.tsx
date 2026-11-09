@@ -79,7 +79,7 @@ export function BreakdownTable({ items, method }: { items: BreakdownItem[]; meth
       <TBody>
         {items.map((i) => (
           <TR key={i.entryId}>
-            <TD>
+            <TD className="min-w-40">
               {i.label}
               {i.notes && <p className="text-xs text-muted-foreground">{i.notes}</p>}
             </TD>

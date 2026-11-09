@@ -125,7 +125,7 @@ export function assessmentSection(ctx: SectionContext, a: Assessment, opts: { ma
   if (a.notes) ctx.b.paragraph(`Notes: ${a.notes}`);
   if (opts.map !== false) {
     ctx.b.paragraph('Burn mapping (2D)', { bold: true });
-    ctx.b.bodyMap(depthBySegment(regionsToItems(ctx.data.regionsByAssessment.get(a.id) ?? [])));
+    ctx.b.bodyMap(depthBySegment(regionsToItems(ctx.data.regionsByAssessment.get(a.id) ?? [])), 100);
   }
 }
 

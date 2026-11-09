@@ -110,7 +110,8 @@
   }
   html {
     -webkit-text-size-adjust: 100%;
-    overflow-x: hidden;
+    /* 'clip' (not 'hidden') so position: sticky keeps working for the sidebar and header. */
+    overflow-x: clip;
   }
   body {
     background: var(--background);
@@ -118,7 +119,7 @@
     font-family: var(--font-sans);
     font-feature-settings: 'cv11', 'ss01';
     -webkit-font-smoothing: antialiased;
-    overflow-x: hidden;
+    overflow-x: clip;
   }
   :focus-visible {
     outline: 2px solid var(--ring);

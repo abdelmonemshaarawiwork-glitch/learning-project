@@ -181,12 +181,12 @@ function nonIndexed(g: THREE.BufferGeometry): THREE.BufferGeometry {
   return ng;
 }
 
-export const CAMERA_TARGET: [number, number, number] = [0, 0.9, 0];
+export const CAMERA_TARGET: [number, number, number] = [0, 0.88, 0];
 export const CAMERA_VIEWS = {
-  anterior: { label: 'Anterior', position: [0, 0.95, 3.1] as [number, number, number] },
-  posterior: { label: 'Posterior', position: [0, 0.95, -3.1] as [number, number, number] },
-  'left-lateral': { label: 'Left lateral', position: [3.1, 0.95, 0] as [number, number, number] },
-  'right-lateral': { label: 'Right lateral', position: [-3.1, 0.95, 0] as [number, number, number] },
+  anterior: { label: 'Anterior', position: [0, 0.92, 3.5] as [number, number, number] },
+  posterior: { label: 'Posterior', position: [0, 0.92, -3.5] as [number, number, number] },
+  'left-lateral': { label: 'Left lateral', position: [3.5, 0.92, 0] as [number, number, number] },
+  'right-lateral': { label: 'Right lateral', position: [-3.5, 0.92, 0] as [number, number, number] },
 } as const;
 export type CameraView = keyof typeof CAMERA_VIEWS;
 

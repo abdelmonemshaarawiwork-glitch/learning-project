@@ -4,6 +4,7 @@ import { subDays, startOfDay, format } from 'date-fns';
 import { Link } from 'react-router';
 import { Bar, BarChart, CartesianGrid, Legend, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { PageHeader } from '@/components/common/PageHeader';
+import { Alert } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -119,6 +120,14 @@ export default function DashboardPage() {
         <StatCard label="Assessments (24 h)" value={data.assessments.filter((a) => a.assessmentDate >= last24).length} icon={<ClipboardList />} hint={`${data.assessments.length} total`} />
         <StatCard label="Attention flags" value={flags.length} icon={<Flag />} tone={flags.some((x) => x.tone === 'warning') ? 'warning' : 'default'} />
       </div>
+
+      {data.patients.length > 0 &&
+        settings.backupReminderDays !== null &&
+        (!settings.lastBackupAt || settings.lastBackupAt < addHoursIso(now, -24 * settings.backupReminderDays)) && (
+          <Alert variant="warning" className="mb-5" title={settings.lastBackupAt ? `No full backup in the last ${settings.backupReminderDays} day(s)` : 'No full backup has been made on this device'}>
+            Data is stored only in this browser. <Link to="/settings?tab=backup">Export a backup</Link> to protect against data loss.
+          </Alert>
+        )}
 
       {data.patients.length === 0 && (
         <EmptyState

@@ -109,7 +109,7 @@ function FluidWorkspace({ patient }: { patient: Patient }) {
     if (!result || !intake || !params) return [];
     const end = result.periodElapsed ? result.periodEnd : asOf;
     const span = Math.max(0, hoursBetween(result.referenceTime, end));
-    const steps = Math.min(96, Math.max(2, Math.ceil(span)));
+    const steps = Math.min(192, Math.max(12, Math.ceil(span * 4))); // ≤15-minute resolution
     const cats = new Set(params.countedIntakeCategories);
     const records = intake.filter((r) => cats.has(r.category));
     return Array.from({ length: steps + 1 }, (_, i) => {

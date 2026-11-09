@@ -183,6 +183,20 @@ export default function BodyViewer3D({ depthBySegment, selectedKeys = [], onSele
 
   return (
     <div className={cn('relative w-full overflow-hidden rounded-xl border bg-gradient-to-b from-[#0e1a30] to-[#060c18]', className)} data-testid="body-viewer-3d">
+      {!usingLicensed && (
+        <div className="flex items-start gap-2 border-b border-[#ffd99a]/20 bg-[#3a2508] px-3 py-2 text-xs text-[#ffd99a]" data-testid="dev-model-banner">
+          <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
+          <span>
+            <strong>Development model</strong> — schematic mannequin, NOT anatomically accurate. A licensed anatomical model has not been installed.
+            {manifest.status === 'invalid' && <> Model manifest rejected: {manifest.error}</>}
+          </span>
+        </div>
+      )}
+      {usingLicensed && !manifest.manifest.anatomicallyReviewed && (
+        <div className="border-b border-[#ffd99a]/20 bg-[#3a2508] px-3 py-2 text-xs text-[#ffd99a]">
+          {manifest.manifest.name} v{manifest.manifest.version}: anatomical accuracy not yet reviewed.
+        </div>
+      )}
       <div className="h-[min(68vh,560px)] min-h-[360px] w-full touch-none">
         <Canvas
           frameloop="demand"
@@ -218,23 +232,6 @@ export default function BodyViewer3D({ depthBySegment, selectedKeys = [], onSele
           />
           <CameraRig view={view} nonce={nonce} controlsRef={controlsRef} />
         </Canvas>
-      </div>
-
-      <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-col gap-2 p-3">
-        {!usingLicensed && (
-          <div className="pointer-events-auto inline-flex max-w-full items-start gap-2 self-start rounded-lg bg-[#3a2508]/90 px-3 py-2 text-xs text-[#ffd99a]" data-testid="dev-model-banner">
-            <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-            <span>
-              <strong>Development model</strong> — schematic mannequin, NOT anatomically accurate. A licensed anatomical model has not been installed.
-              {manifest.status === 'invalid' && <> Model manifest rejected: {manifest.error}</>}
-            </span>
-          </div>
-        )}
-        {usingLicensed && !manifest.manifest.anatomicallyReviewed && (
-          <div className="pointer-events-auto self-start rounded-lg bg-[#3a2508]/90 px-3 py-2 text-xs text-[#ffd99a]">
-            {manifest.manifest.name} v{manifest.manifest.version}: anatomical accuracy not yet reviewed.
-          </div>
-        )}
       </div>
 
       <div className="absolute inset-x-0 bottom-0 flex flex-wrap items-center gap-1.5 bg-gradient-to-t from-black/60 to-transparent p-3">

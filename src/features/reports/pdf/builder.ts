@@ -257,7 +257,7 @@ export class PdfBuilder {
     this.y += 4;
     d.setFontSize(7);
     d.setTextColor(...MUTED);
-    d.text("R / L = patient's right / left. Schematic 2D chart; not to scale.", this.margin, this.y + 1);
+    d.text("R / L = patient's right / left. Colour shows the most severe depth recorded in each region. Schematic 2D chart; not to scale.", this.margin, this.y + 1);
     this.y += 5;
     d.setTextColor(...TEXT);
   }

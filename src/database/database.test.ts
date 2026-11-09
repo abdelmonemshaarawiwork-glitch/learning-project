@@ -213,3 +213,13 @@ describe('migrations', () => {
     upgraded.close();
   });
 });
+
+describe('schema', () => {
+  it('declares all required tables with indexes', async () => {
+    const { CURRENT_STORES } = await import('./schema');
+    for (const t of ['patients', 'assessments', 'assessmentRegions', 'fluidProtocols', 'fluidCalculations', 'intakeRecords', 'outputRecords', 'clinicalObservations', 'timelineEvents', 'referenceDatasets', 'settings', 'auditEvents', 'drafts'])
+      expect(CURRENT_STORES[t], t).toBeDefined();
+    expect(CURRENT_STORES.clinicalObservations).toContain('[patientId+parameter]');
+    expect(db.tables.map((t) => t.name).sort()).toEqual(Object.keys(CURRENT_STORES).sort());
+  });
+});

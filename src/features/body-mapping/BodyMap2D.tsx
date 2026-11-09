@@ -109,7 +109,7 @@ export function BodyMap2D({ depthBySegment, selectedKeys = [], onSelectSegment, 
         </g>
       </svg>
       <p className="mt-1 text-center text-xs text-muted-foreground" aria-live="polite">
-        {hover ? segmentKeyLabel(hover) : 'R / L = patient’s right / left. Tap a region to select it.'}
+        {hover ? segmentKeyLabel(hover) : 'R / L = patient’s right / left. Colour = most severe depth recorded. Tap a region to select it.'}
       </p>
     </div>
   );

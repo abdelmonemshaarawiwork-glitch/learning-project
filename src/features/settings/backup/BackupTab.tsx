@@ -96,6 +96,22 @@ function ExportCard() {
           Last full backup: <strong className="text-foreground">{settings.lastBackupAt ? f.dateTime(settings.lastBackupAt) : 'never'}</strong>. Data stored in this browser is not
           backed up automatically and is not synchronised to other devices.
         </p>
+        <label className="flex flex-wrap items-center gap-2 text-sm">
+          Remind me on the dashboard when the last full backup is older than
+          <select
+            aria-label="Backup reminder"
+            className="h-9 rounded-lg border border-input bg-card px-2 text-sm"
+            value={settings.backupReminderDays ?? 'off'}
+            onChange={(e) => void update('backupReminderDays', e.target.value === 'off' ? null : Number(e.target.value))}
+          >
+            <option value="off">never (reminder off)</option>
+            {[1, 3, 7, 14, 30].map((d) => (
+              <option key={d} value={d}>
+                {d} day{d === 1 ? '' : 's'}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Backup scope">
           {(['all', 'patients'] as const).map((s) => (
             <button
