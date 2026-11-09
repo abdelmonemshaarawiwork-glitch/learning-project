@@ -1,0 +1,166 @@
+{
+  "file": "makehuman-body.glb",
+  "name": "MakeHuman base mesh (hm08), segmented for burn mapping",
+  "version": "1.0.0",
+  "license": {
+    "name": "CC0-1.0",
+    "url": "https://creativecommons.org/publicdomain/zero/1.0/",
+    "attribution": "MakeHuman base mesh hm08 and default skeleton weights, released as CC0 by the MakeHuman project (Data Collection AB, Joel Palmius, Jonas Hauquier). https://github.com/makehumancommunity/makehuman",
+    "redistributionPermitted": true
+  },
+  "anatomicallyReviewed": false,
+  "reviewNotes": "Realistic human surface model. Region boundaries were derived automatically from skeleton skinning weights, geometric rules for buttocks/genitalia and face normals for anterior/posterior; they are approximate and have not been reviewed by a clinician. Always check the selected region label.",
+  "forwardAxis": "+z",
+  "scale": 1,
+  "offsetY": 0,
+  "meshRegions": {
+    "head__anterior": {
+      "segment": "head",
+      "surface": "anterior"
+    },
+    "head__posterior": {
+      "segment": "head",
+      "surface": "posterior"
+    },
+    "neck__anterior": {
+      "segment": "neck",
+      "surface": "anterior"
+    },
+    "trunk__anterior": {
+      "segment": "trunk",
+      "surface": "anterior"
+    },
+    "neck__posterior": {
+      "segment": "neck",
+      "surface": "posterior"
+    },
+    "trunk__posterior": {
+      "segment": "trunk",
+      "surface": "posterior"
+    },
+    "upper-arm-right__anterior": {
+      "segment": "upper-arm-right",
+      "surface": "anterior"
+    },
+    "upper-arm-right__posterior": {
+      "segment": "upper-arm-right",
+      "surface": "posterior"
+    },
+    "hand-right__posterior": {
+      "segment": "hand-right",
+      "surface": "posterior"
+    },
+    "hand-right__anterior": {
+      "segment": "hand-right",
+      "surface": "anterior"
+    },
+    "forearm-right__anterior": {
+      "segment": "forearm-right",
+      "surface": "anterior"
+    },
+    "forearm-right__posterior": {
+      "segment": "forearm-right",
+      "surface": "posterior"
+    },
+    "buttock-right__posterior": {
+      "segment": "buttock-right",
+      "surface": "posterior"
+    },
+    "thigh-right__anterior": {
+      "segment": "thigh-right",
+      "surface": "anterior"
+    },
+    "thigh-right__posterior": {
+      "segment": "thigh-right",
+      "surface": "posterior"
+    },
+    "genitalia__anterior": {
+      "segment": "genitalia",
+      "surface": "anterior"
+    },
+    "leg-right__posterior": {
+      "segment": "leg-right",
+      "surface": "posterior"
+    },
+    "leg-right__anterior": {
+      "segment": "leg-right",
+      "surface": "anterior"
+    },
+    "foot-right__posterior": {
+      "segment": "foot-right",
+      "surface": "posterior"
+    },
+    "foot-right__anterior": {
+      "segment": "foot-right",
+      "surface": "anterior"
+    },
+    "upper-arm-left__anterior": {
+      "segment": "upper-arm-left",
+      "surface": "anterior"
+    },
+    "upper-arm-left__posterior": {
+      "segment": "upper-arm-left",
+      "surface": "posterior"
+    },
+    "hand-left__posterior": {
+      "segment": "hand-left",
+      "surface": "posterior"
+    },
+    "hand-left__anterior": {
+      "segment": "hand-left",
+      "surface": "anterior"
+    },
+    "forearm-left__anterior": {
+      "segment": "forearm-left",
+      "surface": "anterior"
+    },
+    "forearm-left__posterior": {
+      "segment": "forearm-left",
+      "surface": "posterior"
+    },
+    "buttock-left__posterior": {
+      "segment": "buttock-left",
+      "surface": "posterior"
+    },
+    "thigh-left__anterior": {
+      "segment": "thigh-left",
+      "surface": "anterior"
+    },
+    "thigh-left__posterior": {
+      "segment": "thigh-left",
+      "surface": "posterior"
+    },
+    "leg-left__posterior": {
+      "segment": "leg-left",
+      "surface": "posterior"
+    },
+    "leg-left__anterior": {
+      "segment": "leg-left",
+      "surface": "anterior"
+    },
+    "foot-left__posterior": {
+      "segment": "foot-left",
+      "surface": "posterior"
+    },
+    "foot-left__anterior": {
+      "segment": "foot-left",
+      "surface": "anterior"
+    }
+  },
+  "provenance": {
+    "source": "https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/3dobjs/base.obj",
+    "sourceSha256": "8e761e6624b8f54536409135d1636da63b32486a90d4897f84e121d144f6fb4c",
+    "weights": "https://raw.githubusercontent.com/makehumancommunity/makehuman/master/makehuman/data/rigs/default_weights.mhw",
+    "weightsSha256": "0f3641d651ae3d00ad6b4ccee43142edb109d3bd909d27d9e4139ef1beed8625",
+    "builtBy": "scripts/build-anatomical-model.mjs",
+    "segmentationParameters": {
+      "crotchY": -0.6195,
+      "pelvisZ": 0.1973625258799172,
+      "glutealFoldY": -0.9695,
+      "glutealTopY": 1.4805000000000001,
+      "genitalTopY": 0.13049999999999995,
+      "genitalHalfWidth": 0.55,
+      "units": "decimetres (source)"
+    }
+  }
+}

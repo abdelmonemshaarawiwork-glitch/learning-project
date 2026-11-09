@@ -31,25 +31,42 @@ test.describe('offline PWA', () => {
   });
 });
 
-test('3D viewer: development model is labelled and a region can be selected', async ({ page }) => {
+test('3D viewer: realistic CC0 anatomical model loads, is attributed, and regions are selectable', async ({ page }) => {
   await openApp(page);
   await createPatient(page, { name: '3D Patient', age: '40' });
   await page.goto('/body-map');
   await page.getByTestId('start-mapping').click();
   const viewer = page.getByTestId('body-viewer-3d');
   await expect(viewer).toBeVisible();
-  await expect(page.getByTestId('dev-model-banner')).toContainText('NOT anatomically accurate');
+  await expect(page.getByTestId('model-banner')).toContainText('MakeHuman');
+  await expect(page.getByTestId('model-banner')).toContainText('not been clinically reviewed');
+  await expect(page.getByTestId('dev-model-banner')).toHaveCount(0);
   const canvas = viewer.locator('canvas');
   await expect(canvas).toBeVisible();
-  await page.waitForTimeout(1500);
+  await expect(viewer).toHaveAttribute('data-model-ready', 'true', { timeout: 20_000 });
+  await expect(viewer).toHaveAttribute('data-camera-settled', 'true');
   const box = (await canvas.boundingBox())!;
-  // Centre of the anterior view = anterior trunk.
+  // Centre of the anterior view = anterior trunk (abdomen).
   await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.42);
   await expect(page.getByTestId('region-editor')).toContainText('Trunk');
+  await expect(page.getByTestId('region-editor')).toContainText('(anterior)');
   await viewer.getByRole('button', { name: 'Posterior', exact: true }).click();
-  await expect(viewer.getByRole('button', { name: 'Posterior', exact: true })).toHaveAttribute('aria-pressed', 'true');
+  await expect(viewer).toHaveAttribute('data-camera-view', 'posterior');
+  await expect(viewer).toHaveAttribute('data-camera-settled', 'true', { timeout: 15_000 });
+  const box2 = (await canvas.boundingBox())!; // clicking the button may have scrolled the page
+  await page.mouse.click(box2.x + box2.width / 2, box2.y + box2.height * 0.42);
+  await expect(page.getByTestId('region-editor')).toContainText('(posterior)');
   await viewer.getByRole('button', { name: 'Reset camera' }).click();
   await expect(viewer.getByRole('button', { name: 'Anterior', exact: true })).toHaveAttribute('aria-pressed', 'true');
+});
+
+test('3D viewer falls back to the labelled development mannequin when no model manifest exists', async ({ page }) => {
+  await page.route('**/models/manifest.json', (route) => route.fulfill({ status: 404, body: 'not found' }));
+  await openApp(page);
+  await createPatient(page, { name: 'Mannequin Patient', age: '40' });
+  await page.goto('/body-map');
+  await page.getByTestId('start-mapping').click();
+  await expect(page.getByTestId('dev-model-banner')).toContainText('NOT anatomically accurate');
 });
 
 test('falls back to the 2D map when WebGL is unavailable', async ({ page }) => {
