@@ -379,6 +379,20 @@ AGENT = {
 }
 
 
+def asset_version(rel: str) -> str:
+    """Short content hash, so a changed file gets a new URL and browsers never use a stale copy."""
+    import hashlib
+    return hashlib.sha1((ROOT / rel).read_bytes()).hexdigest()[:10]
+
+
+def css_href() -> str:
+    return f"/assets/site.css?v={asset_version('assets/site.css')}"
+
+
+def agent_src() -> str:
+    return f"/assets/agent.js?v={asset_version('assets/agent.js')}"
+
+
 def esc(s: str) -> str:
     return html.escape(s, quote=True)
 
@@ -461,7 +475,7 @@ def render(lang: str) -> str:
 <meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="preload" href="/assets/fonts/{'ibm-plex-sans-arabic-arabic-400-normal' if lang == 'ar' else 'inter-latin-wght-normal'}.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="{css_href()}">
 </head>
 <body>
 <a class="skip" href="#main">{esc(c['skip'])}</a>
@@ -601,7 +615,7 @@ def render_agent(lang: str) -> str:
 <meta name="theme-color" content="#f8f7f2" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#191b18" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="/assets/site.css">
+<link rel="stylesheet" href="{css_href()}">
 </head>
 <body>
 <header class="site-header">
@@ -661,7 +675,7 @@ def render_agent(lang: str) -> str:
   </div>
 </main>
 <script type="application/json" id="agent-i18n">{i18n_json}</script>
-<script src="/assets/agent.js" defer></script>
+<script src="{agent_src()}" defer></script>
 </body>
 </html>
 """
