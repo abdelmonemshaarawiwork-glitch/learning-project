@@ -5,7 +5,7 @@
   "description": "Study Quest information website + private AI study-plan agent (Netlify Functions)",
   "scripts": {
     "build": "python3 build.py",
-    "dev": "AGENT_PASSWORD=local-dev-password AGENT_MOCK=1 tsx dev-server.mts",
+    "dev": "AGENT_PASSWORD=local-dev-password tsx dev-server.mts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:e2e": "node tests/agent.e2e.mjs"

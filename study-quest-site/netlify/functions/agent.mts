@@ -1,14 +1,13 @@
 /**
  * Agent API (synchronous, fast):
- *   POST   /api/agent/auth          check the password; reports whether Claude is configured
+ *   POST   /api/agent/auth          check the password; reports which planner runs (claude | sample)
  *   GET    /api/agent/status?id=…   progress / result of a running turn
  *   GET    /api/agent/chats         saved conversations (newest first)
  *   GET    /api/agent/chats/:id     one conversation with its plan
  *   DELETE /api/agent/chats/:id     delete a conversation
  * Every route requires the x-agent-password header.
  */
-import { anthropicConfigured } from "../lib/claude.mts";
-import { dailyLimit, type Chat, type ChatSummary, type Job } from "../lib/agent.mts";
+import { activeProvider, dailyLimit, type Chat, type ChatSummary, type Job } from "../lib/agent.mts";
 import { errorJson, ID_RE, json, requirePassword } from "../lib/http.mts";
 import { openStore } from "../lib/store.mts";
 
@@ -22,7 +21,8 @@ export default async (req: Request, context?: Ctx) => {
 
   try {
     if (path === "/api/agent/auth" && req.method === "POST") {
-      return json({ ok: true, aiConfigured: anthropicConfigured() || process.env.AGENT_MOCK === "1", dailyLimit: dailyLimit() });
+      const provider = activeProvider();
+      return json({ ok: true, provider, dailyLimit: provider === "claude" ? dailyLimit() : null });
     }
     if (path === "/api/agent/status" && req.method === "GET") {
       const id = url.searchParams.get("id") ?? "";

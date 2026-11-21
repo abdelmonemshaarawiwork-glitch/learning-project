@@ -1,7 +1,7 @@
 /**
  * Local development server: serves the static site and the agent functions
  * (background function runs without being awaited, like on Netlify).
- *   npm run dev   →  http://localhost:8888   (password: local-dev-password, mock AI)
+ *   npm run dev   →  http://localhost:8888   (password: local-dev-password; free sample planner unless ANTHROPIC_API_KEY is set)
  */
 import { createServer } from "node:http";
 import { promises as fs } from "node:fs";

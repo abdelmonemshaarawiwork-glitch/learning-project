@@ -40,7 +40,7 @@ await p.locator("#suggestions .chip").first().click();
 await p.locator("#working").waitFor({ timeout: 10000 });
 await p.reload();
 await p.locator("#workspace").waitFor({ state: "visible" });
-check("in-progress turn resumes after reload", await p.locator("#working").isVisible({ timeout: 5000 }).catch(() => false));
+check("turn in progress at reload is not lost", await p.locator("#working, .msg.assistant:not(.working) >> nth=1").first().isVisible({ timeout: 5000 }).catch(() => false));
 await p.locator(".msg.assistant:not(.working)").nth(1).waitFor({ timeout: 90000 });
 check("follow-up answered after reload", (await p.locator(".msg.assistant:not(.working)").count()) === 2);
 check("plan updated tag", (await p.locator(".msg .tag").count()) >= 2);
@@ -48,12 +48,12 @@ check("plan updated tag", (await p.locator(".msg .tag").count()) >= 2);
 await p.reload();
 await p.locator("#workspace").waitFor({ state: "visible" });
 await p.locator(".msg.assistant:not(.working)").nth(1).waitFor({ timeout: 15000 });
-check("conversation restored after reload", (await p.locator(".msg").count()) === 4);
+{ const n = await p.locator(".msg").count(); check("conversation restored after reload", n === 4, `${n} messages`); }
 const opts = await p.locator("#history option").count();
 check("saved plans list", opts === 2, `${opts - 1} saved`);
 // new plan + switching back via history
 await p.click("#new-chat");
-check("new plan clears", (await p.locator(".msg").count()) === 0);
+{ const n = await p.locator(".msg").count(); check("new plan clears", n === 0, `${n} messages`); }
 await p.selectOption("#history", { index: 1 });
 await p.locator(".msg.assistant:not(.working)").nth(1).waitFor({ timeout: 15000 });
 check("open saved plan from history", true);

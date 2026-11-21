@@ -9,7 +9,7 @@
   var JOB_KEY = "sq_agent_job";
   var $ = function (id) { return document.getElementById(id); };
 
-  var state = { password: null, chatId: null, chat: null, busy: false, aiConfigured: true };
+  var state = { password: null, chatId: null, chat: null, busy: false, provider: "sample" };
 
   // ---------- storage helpers (never fatal) ----------
   function loadPw() {
@@ -78,7 +78,7 @@
       btn.disabled = false;
       if (r.status === 200) {
         if (!silent) savePw(pw, remember);
-        state.aiConfigured = !!(r.data && r.data.aiConfigured);
+        state.provider = (r.data && r.data.provider) || "sample";
         openWorkspace();
         return;
       }
@@ -92,13 +92,23 @@
   function openWorkspace() {
     $("lock").hidden = true;
     $("workspace").hidden = false;
-    $("ai-notice").hidden = state.aiConfigured;
+    $("ai-notice").hidden = state.provider !== "sample";
     refreshHistory();
     var pending = getPendingJob();
     var last = getLastChat();
     if (pending && Date.now() - pending.started < 15 * 60 * 1000) {
-      // A turn was still running when the page was closed: show it and keep waiting.
-      loadChat(pending.chatId, function () { track(pending); });
+      // A turn was in progress when the page was closed. If it has finished since,
+      // just show the conversation; otherwise show it and keep waiting.
+      api("/api/agent/status?id=" + encodeURIComponent(pending.jobId)).then(function (r) {
+        var finished = r.status === 200 && r.data && (r.data.state === "done" || r.data.state === "error");
+        if (finished) {
+          setPendingJob(null);
+          setLastChat(pending.chatId);
+          loadChat(pending.chatId);
+        } else {
+          loadChat(pending.chatId, function () { track(pending); });
+        }
+      });
     } else {
       setPendingJob(null);
       if (last) loadChat(last); else renderAll();
@@ -293,7 +303,6 @@
   function send(text) {
     text = (text || "").trim();
     if (!text || state.busy) return;
-    if (!state.aiConfigured) { $("ai-notice").hidden = false; return; }
     state.busy = true;
     var isFirst = !state.chat || !state.chat.turns || !state.chat.turns.length;
     var chatId = state.chatId || uid();

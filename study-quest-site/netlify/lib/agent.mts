@@ -1,6 +1,6 @@
 import { Allow, parse as parsePartial } from "partial-json";
 import { AgentError, anthropicConfigured, runClaude, type HistoryMessage } from "./claude.mts";
-import { runMock } from "./mock.mts";
+import { paceFromInput, sampleTurn, type Pace } from "./sample.mts";
 import type { Plan, RunInput } from "./schema.mts";
 import { openStore } from "./store.mts";
 
@@ -20,6 +20,8 @@ export interface Chat {
   /** Raw model messages (assistant content = JSON) for context. */
   history: HistoryMessage[];
   plan: Plan | null;
+  /** First-turn study time / target date, reused by the sample planner. */
+  pace?: Pace;
 }
 
 export interface ChatSummary {
@@ -40,6 +42,13 @@ export interface Preview {
 }
 
 const MAX_HISTORY = 16;
+
+export type Provider = "claude" | "sample";
+
+/** Claude when an API key is configured, otherwise the free built-in sample planner. */
+export function activeProvider(): Provider {
+  return anthropicConfigured() ? "claude" : "sample";
+}
 
 export function dailyLimit() {
   const n = Number(process.env.AGENT_DAILY_LIMIT ?? "60");
@@ -76,12 +85,14 @@ export async function runTurn(input: RunInput): Promise<void> {
   await jobs.set(input.jobId, { state: "running", chatId: input.chatId, startedAt } satisfies Job);
 
   try {
-    const day = new Date().toISOString().slice(0, 10);
-    const used = (await meta.get<number>(`usage_${day}`)) ?? 0;
-    if (used >= dailyLimit()) throw new AgentError("daily_limit");
-    const mock = process.env.AGENT_MOCK === "1";
-    if (!mock && !anthropicConfigured()) throw new AgentError("not_configured_ai");
-    await meta.set(`usage_${day}`, used + 1);
+    const provider = activeProvider();
+    if (provider === "claude") {
+      // The daily cap only matters when each message costs money.
+      const day = new Date().toISOString().slice(0, 10);
+      const used = (await meta.get<number>(`usage_${day}`)) ?? 0;
+      if (used >= dailyLimit()) throw new AgentError("daily_limit");
+      await meta.set(`usage_${day}`, used + 1);
+    }
 
     const chat: Chat = (await chats.get<Chat>(input.chatId)) ?? {
       id: input.chatId,
@@ -106,7 +117,14 @@ export async function runTurn(input: RunInput): Promise<void> {
       const preview = previewFrom(soFar);
       pending = pending.then(() => jobs.set(input.jobId, { state: "running", chatId: input.chatId, startedAt, preview } satisfies Job)).catch(() => undefined);
     };
-    const { reply, raw } = mock ? await runMock(history, onText) : await runClaude(history, onText);
+    const pace: Pace = chat.pace ?? paceFromInput(input);
+    let reply, raw;
+    if (provider === "claude") {
+      ({ reply, raw } = await runClaude(history, onText));
+    } else {
+      reply = sampleTurn(input.message, chat.plan, pace);
+      raw = JSON.stringify(reply);
+    }
     await pending;
 
     const now = Date.now();
@@ -122,6 +140,7 @@ export async function runTurn(input: RunInput): Promise<void> {
       ].slice(-60),
       history: [...history, { role: "assistant" as const, content: raw }].slice(-MAX_HISTORY),
       plan,
+      pace,
     };
     if (plan && reply.plan_changed) updated.title = plan.title || updated.title;
     await chats.set(updated.id, updated);

@@ -318,7 +318,7 @@ select.field, input[type="date"].field { height: 42px; font-size: 14.5px; paddin
 .check input { width: 17px; height: 17px; accent-color: var(--sage-strong); }
 .error { color: #a65d54; font-size: 14.5px; margin: 0; }
 @media (prefers-color-scheme: dark) { .error { color: #d88f85; } }
-.notice { border-radius: 14px; padding: 12px 16px; font-size: 14.5px; background: var(--honey); color: var(--honey-strong); margin-bottom: 18px; }
+.notice { border-radius: 14px; padding: 12px 16px; font-size: 14.5px; background: var(--sage-soft); color: var(--sage-strong); margin-bottom: 18px; line-height: 1.6; }
 button.btn { border: 0; cursor: pointer; font: inherit; font-size: 15.5px; font-weight: 500; }
 button.btn:disabled { opacity: .55; cursor: default; }
 .btn-sm { height: 38px; padding: 0 14px; border-radius: 11px; font-size: 14px !important; }

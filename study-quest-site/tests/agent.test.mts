@@ -5,7 +5,6 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 process.env.AGENT_LOCAL_STORE = "1";
 process.env.LOCAL_BLOBS_DIR = mkdtempSync(path.join(tmpdir(), "sq-agent-"));
-process.env.AGENT_MOCK_DELAY_MS = "0";
 
 const { normalizePlan, runSchema } = await import("../netlify/lib/schema.mts");
 const { passwordMatches, requirePassword } = await import("../netlify/lib/http.mts");
@@ -18,7 +17,6 @@ const req = (path: string, init: RequestInit & { pw?: string } = {}) =>
 
 beforeEach(() => {
   process.env.AGENT_PASSWORD = "secret-pw";
-  process.env.AGENT_MOCK = "1";
   delete process.env.ANTHROPIC_API_KEY;
 });
 
@@ -94,13 +92,15 @@ describe("agent turns", () => {
     expect((await api(req("/api/agent/chats/chat_00000001", { method: "DELETE" }))).status).toBe(200);
     expect((await api(req("/api/agent/chats/chat_00000001"))).status).toBe(404);
   });
-  it("reports missing AI configuration instead of failing silently", async () => {
-    delete process.env.AGENT_MOCK;
-    await runTurn(runSchema.parse({ jobId: "job_000000003", chatId: "chat_00000002", message: "hi there" }));
-    const job = await (await openStore("agent-jobs")).get<{ state: string; code: string }>("job_000000003");
-    expect(job).toMatchObject({ state: "error", code: "not_configured_ai" });
+  it("uses the free sample planner when no API key is set", async () => {
+    const auth = await (await api(req("/api/agent/auth", { method: "POST" }))).json();
+    expect(auth).toMatchObject({ ok: true, provider: "sample" });
+    await runTurn(runSchema.parse({ jobId: "job_000000003", chatId: "chat_00000002", message: "Photosynthesis" }));
+    const job = await (await openStore("agent-jobs")).get<{ state: string; plan: { title: string } }>("job_000000003");
+    expect(job).toMatchObject({ state: "done", plan: { title: "Photosynthesis" } });
   });
-  it("enforces the daily limit", async () => {
+  it("enforces the daily limit when Claude is in use", async () => {
+    process.env.ANTHROPIC_API_KEY = "test-key-not-used";
     process.env.AGENT_DAILY_LIMIT = "1";
     const meta = await openStore("agent-meta");
     await meta.set(`usage_${new Date().toISOString().slice(0, 10)}`, 1);
@@ -108,6 +108,7 @@ describe("agent turns", () => {
     const job = await (await openStore("agent-jobs")).get<{ code: string }>("job_000000004");
     expect(job?.code).toBe("daily_limit");
     delete process.env.AGENT_DAILY_LIMIT;
+    delete process.env.ANTHROPIC_API_KEY;
   });
   it("requires the password on every route", async () => {
     expect((await api(req("/api/agent/chats", { pw: "wrong" }), { ip: "10.1.1.1" })).status).toBe(401);
