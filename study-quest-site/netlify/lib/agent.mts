@@ -22,12 +22,33 @@ export interface Chat {
   plan: Plan | null;
   /** First-turn study time / target date, reused by the sample planner. */
   pace?: Pace;
+  /** Set once the learner starts following the plan. done: mission key → time ticked. */
+  journey?: Journey;
+}
+
+export interface Journey {
+  startedAt: number;
+  done: Record<string, number>;
+}
+
+/** Missions are tracked by title, so ticks survive plan revisions that keep a mission. */
+export function missionKey(title: string): string {
+  return title.trim().toLowerCase().replace(/\s+/g, " ").slice(0, 160);
+}
+
+export function journeyProgress(chat: Pick<Chat, "plan" | "journey">): number | null {
+  if (!chat.journey || !chat.plan) return null;
+  const keys = chat.plan.stages.flatMap((s) => s.levels.flatMap((l) => l.missions.map((m) => missionKey(m.title))));
+  if (!keys.length) return 0;
+  return Math.round((keys.filter((k) => chat.journey!.done[k]).length / keys.length) * 100);
 }
 
 export interface ChatSummary {
   id: string;
   title: string;
   updatedAt: number;
+  /** Percent of missions done, when a journey has been started. */
+  progress?: number | null;
 }
 
 export type Job =
@@ -145,7 +166,7 @@ export async function runTurn(input: RunInput): Promise<void> {
     if (plan && reply.plan_changed) updated.title = plan.title || updated.title;
     await chats.set(updated.id, updated);
     const index = (await meta.get<ChatSummary[]>("chat_index")) ?? [];
-    await meta.set("chat_index", [{ id: updated.id, title: updated.title, updatedAt: now }, ...index.filter((c) => c.id !== updated.id)].slice(0, 200));
+    await meta.set("chat_index", [{ id: updated.id, title: updated.title, updatedAt: now, progress: journeyProgress(updated) }, ...index.filter((c) => c.id !== updated.id)].slice(0, 200));
     await jobs.set(input.jobId, { state: "done", chatId: input.chatId, startedAt, finishedAt: now, reply: reply.reply, planChanged: reply.plan_changed, plan } satisfies Job);
   } catch (e) {
     const code = e instanceof AgentError ? e.code : "server_error";

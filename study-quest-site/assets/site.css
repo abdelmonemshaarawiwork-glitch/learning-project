@@ -384,3 +384,43 @@ button.chip:hover { border-color: var(--sage); color: var(--ink); }
   .plan-pane { border: 0; box-shadow: none; position: static; max-height: none; overflow: visible; }
   body { background: #fff; }
 }
+
+/* journey mode */
+.start-hint { margin: 10px 0 0; font-size: 13.5px; color: var(--ink-3); }
+.journey-progress { margin-top: 18px; background: var(--surface-2); border-radius: 14px; padding: 14px 16px; }
+.jp-top { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.jp-top strong { font-size: 26px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.jp-top span { color: var(--ink-2); font-size: 14.5px; }
+.journey-progress .progress { margin-top: 10px; background: var(--muted); }
+.journey-progress .progress > span { transition: width .5s ease; }
+.journey-progress .plan-stats { margin-top: 12px; }
+.next-up { margin-top: 14px; border: 1px solid color-mix(in oklab, var(--sage) 45%, transparent); background: var(--sage-soft); border-radius: 14px; padding: 12px 16px; display: grid; gap: 2px; }
+.next-up small { color: var(--sage-strong); font-size: 12.5px; font-weight: 600; }
+.next-up b { color: var(--ink); font-weight: 600; font-size: 15.5px; }
+.flash { margin-top: 14px; border-radius: 14px; padding: 12px 16px; background: var(--honey); color: var(--honey-strong); font-weight: 600; font-size: 14.5px; animation: fade .4s ease both; }
+.flash.done { background: var(--sage-soft); color: var(--sage-strong); }
+.p-level .jstate { margin-inline-start: 8px; font-size: 12.5px; font-weight: 500; color: var(--ink-3); }
+.p-level.j-done .node { background: var(--sage); border-color: var(--sage); color: var(--on-sage); }
+.p-level.j-done .node svg, .p-level.j-locked .node svg { width: 15px; height: 15px; }
+.p-level.j-done::before { border-inline-start-style: solid; border-color: color-mix(in oklab, var(--sage) 70%, transparent); }
+.p-level.j-done .jstate, .p-level.j-current .jstate { color: var(--sage-strong); }
+.p-level.j-current .node { box-shadow: 0 0 0 5px var(--sage-soft); }
+.p-level.j-locked .node { border: 1px solid var(--line); background: var(--surface-2); color: var(--ink-3); }
+.p-level.j-locked h3 { color: var(--ink-2); }
+.locked-hint { margin: 4px 0 0; font-size: 13px; color: var(--ink-3); }
+.missions.jm { gap: 6px; }
+.missions.jm li { padding: 0; background: transparent; }
+.tick { width: 100%; display: flex; align-items: center; gap: 12px; text-align: start; font: inherit; color: var(--ink); background: var(--surface-2); border: 1px solid transparent; border-radius: 12px; padding: 10px 12px; cursor: pointer; transition: background-color .15s, border-color .15s; min-height: 48px; }
+.tick:hover:not(:disabled) { border-color: color-mix(in oklab, var(--sage) 50%, transparent); }
+.tick:disabled { cursor: default; opacity: .55; }
+.tick .box { flex: none; width: 24px; height: 24px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; color: var(--on-sage); background: var(--surface); transition: background-color .2s, border-color .2s; }
+.tick .box svg { width: 14px; height: 14px; }
+.tick .t { display: grid; gap: 1px; min-width: 0; }
+.tick .t > span { font-size: 14.5px; line-height: 1.4; }
+.tick .t small { color: var(--ink-3); font-size: 12.5px; }
+.is-done .tick { background: color-mix(in oklab, var(--sage-soft) 70%, transparent); }
+.is-done .tick .box { background: var(--sage); border-color: var(--sage); animation: pop .3s ease both; }
+.is-done .tick .t > span { color: var(--ink-2); }
+@keyframes pop { 0% { transform: scale(.8); } 100% { transform: scale(1); } }
+.missions.jm li span { margin: 0; }
+.missions.jm li { display: block; }

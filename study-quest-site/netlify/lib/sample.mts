@@ -226,8 +226,13 @@ function shorten(plan: Plan): Plan {
   const p: Plan = structuredClone(plan);
   for (const s of p.stages)
     for (const l of s.levels) {
-      if (l.missions.length > 2) l.missions = l.missions.filter((m) => !["flashcards", "diagram", "notes"].includes(m.activity) || l.missions.length <= 2);
-      if (l.missions.length > 2) l.missions = l.missions.slice(0, 2);
+      if (l.missions.length > 2) {
+        // Keep the two most essential missions (reading/recall/practice before notes, diagrams, flashcards).
+        const optional = ["flashcards", "diagram", "notes"];
+        const ranked = [...l.missions].sort((a, b) => Number(optional.includes(a.activity)) - Number(optional.includes(b.activity)));
+        const keep = new Set(ranked.slice(0, 2));
+        l.missions = l.missions.filter((m) => keep.has(m));
+      }
       l.missions = l.missions.map((m) => ({ ...m, minutes: Math.max(10, Math.round((m.minutes * 0.8) / 5) * 5) }));
     }
   return p;

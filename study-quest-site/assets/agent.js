@@ -122,7 +122,7 @@
       while (sel.options.length > 1) sel.remove(1);
       var chats = (r.data && r.data.chats) || [];
       chats.forEach(function (c) {
-        var o = el("option", null, c.title || T.untitled);
+        var o = el("option", null, (c.title || T.untitled) + (typeof c.progress === "number" ? " — " + c.progress + "%" : ""));
         o.value = c.id;
         sel.appendChild(o);
       });
@@ -218,6 +218,169 @@
     return lines.join("\n");
   }
 
+
+  // ---------- journey (ticking missions) ----------
+  function mKey(title) { return String(title).trim().toLowerCase().replace(/\s+/g, " ").slice(0, 160); }
+  var DIFF = { easy: 1, medium: 1.25, hard: 1.5 };
+  function missionXp(m) { return Math.round((8 + Math.min(120, Math.max(5, m.minutes)) * 0.6) * (DIFF[m.difficulty] || 1)); }
+  function localDay(ts) { var d = new Date(ts); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function streakDays(done) {
+    var days = {};
+    Object.keys(done).forEach(function (k) { days[localDay(done[k])] = true; });
+    var d = new Date(), n = 0;
+    if (!days[localDay(d.getTime())]) d.setDate(d.getDate() - 1);
+    while (days[localDay(d.getTime())]) { n++; d.setDate(d.getDate() - 1); }
+    return n;
+  }
+  function journeyModel(plan, done) {
+    var levels = [];
+    plan.stages.forEach(function (s, si) { s.levels.forEach(function (l) { levels.push({ stage: si, level: l }); }); });
+    var current = -1;
+    levels.forEach(function (x, i) {
+      x.doneCount = x.level.missions.filter(function (m) { return done[mKey(m.title)]; }).length;
+      x.complete = x.level.missions.length > 0 && x.doneCount === x.level.missions.length;
+      if (!x.complete && current === -1) current = i;
+    });
+    levels.forEach(function (x, i) {
+      x.state = x.complete ? "done" : i === current ? "current" : x.doneCount > 0 ? "current" : "locked";
+      x.index = i;
+    });
+    return { levels: levels, current: current };
+  }
+
+  var journeyFlash = null; // message shown once after finishing a level
+
+  function tick(m, makeDone) {
+    var chat = state.chat;
+    if (!chat || !chat.journey) return;
+    var key = mKey(m.title);
+    var before = journeyModel(chat.plan, chat.journey.done);
+    var prev = chat.journey.done[key];
+    if (makeDone) chat.journey.done[key] = Date.now(); else delete chat.journey.done[key];
+    var after = journeyModel(chat.plan, chat.journey.done);
+    if (makeDone) {
+      after.levels.forEach(function (x, i) {
+        if (x.complete && !before.levels[i].complete) {
+          journeyFlash = after.current === -1 ? T.journeyDone : T.levelDone.replace("{n}", i + 1) + (after.current >= 0 ? " · " + T.nextUnlocked.replace("{n}", after.current + 1) : "");
+        }
+      });
+    }
+    renderPlan(chat.plan, false);
+    api("/api/agent/chats/" + encodeURIComponent(state.chatId) + "/journey", { method: "POST", body: { action: "tick", title: m.title, done: makeDone } }).then(function (r) {
+      if (r.status === 200) { refreshHistory(); return; }
+      if (prev) chat.journey.done[key] = prev; else delete chat.journey.done[key];
+      journeyFlash = null;
+      renderPlan(chat.plan, false);
+      $("plan").insertBefore(el("p", "error", T.saveError), $("plan").firstChild);
+    });
+  }
+
+  function journeyCall(action) {
+    return api("/api/agent/chats/" + encodeURIComponent(state.chatId) + "/journey", { method: "POST", body: { action: action } }).then(function (r) {
+      if (r.status === 200 && r.data) {
+        state.chat.journey = r.data.journey;
+        renderPlan(state.chat.plan, false);
+        refreshHistory();
+      } else {
+        $("plan").insertBefore(el("p", "error", T.saveError), $("plan").firstChild);
+      }
+    });
+  }
+
+  function renderJourney(plan, wrap) {
+    var done = state.chat.journey.done;
+    var model = journeyModel(plan, done);
+    var all = model.levels.reduce(function (a, x) { return a + x.level.missions.length; }, 0);
+    var finished = model.levels.reduce(function (a, x) { return a + x.doneCount; }, 0);
+    var pct = all ? Math.round((finished / all) * 100) : 0;
+    var xp = 0, minutes = 0;
+    model.levels.forEach(function (x) {
+      x.level.missions.forEach(function (m) { if (done[mKey(m.title)]) { xp += missionXp(m); minutes += m.minutes; } });
+      if (x.complete) xp += 40;
+    });
+
+    if (journeyFlash) {
+      wrap.appendChild(el("div", "flash", journeyFlash));
+      journeyFlash = null;
+    }
+    var prog = el("div", "journey-progress");
+    var top = el("div", "jp-top");
+    top.appendChild(el("strong", null, pct + "%"));
+    top.appendChild(el("span", null, T.journeyProgress.replace("{done}", finished).replace("{total}", all)));
+    prog.appendChild(top);
+    var bar = el("div", "progress");
+    var fill = el("span");
+    fill.style.width = pct + "%";
+    bar.appendChild(fill);
+    prog.appendChild(bar);
+    var stats = el("div", "plan-stats");
+    stats.appendChild(el("span", "chip", T.xp.replace("{n}", xp)));
+    var sd = streakDays(done);
+    stats.appendChild(el("span", "chip", sd > 0 ? T.streak.replace("{n}", sd) : T.streakNone));
+    stats.appendChild(el("span", "chip", T.doneTime.replace("{time}", fmtMinutes(minutes))));
+    prog.appendChild(stats);
+    wrap.appendChild(prog);
+
+    if (model.current === -1) {
+      wrap.appendChild(el("div", "flash done", T.journeyDone));
+    } else {
+      var next = model.levels[model.current].level.missions.filter(function (m) { return !done[mKey(m.title)]; })[0];
+      if (next) {
+        var nx = el("div", "next-up");
+        nx.appendChild(el("small", null, T.nextMission + " · " + T.level + " " + (model.current + 1)));
+        nx.appendChild(el("b", null, next.title));
+        wrap.appendChild(nx);
+      }
+    }
+
+    plan.stages.forEach(function (s, si) {
+      var st = el("section", "p-stage");
+      var title = el("div", "stage-title", T.stage + " " + (si + 1) + " ");
+      title.appendChild(el("b", null, s.title));
+      st.appendChild(title);
+      var ol = el("ol", "levels");
+      model.levels.filter(function (x) { return x.stage === si; }).forEach(function (x) {
+        var li = el("li", "p-level j-" + x.state);
+        var node = el("span", "node");
+        if (x.state === "done") node.innerHTML = T.checkIcon;
+        else if (x.state === "locked") node.innerHTML = T.lockIcon;
+        else node.textContent = String(x.index + 1);
+        li.appendChild(node);
+        var body = el("div");
+        var h = el("h3", null, x.level.title);
+        h.appendChild(el("span", "jstate", x.state === "done" ? T.stateDone : x.state === "current" ? T.stateCurrent : T.stateLocked));
+        body.appendChild(h);
+        if (x.state === "locked") body.appendChild(el("p", "locked-hint", T.lockedHint.replace("{n}", model.current + 1)));
+        var ms = el("ul", "missions jm");
+        x.level.missions.forEach(function (m) {
+          var isDone = !!done[mKey(m.title)];
+          var row = el("li", isDone ? "is-done" : "");
+          var b = el("button", "tick");
+          b.type = "button";
+          b.setAttribute("role", "checkbox");
+          b.setAttribute("aria-checked", String(isDone));
+          b.setAttribute("aria-label", (isDone ? T.markUndone : T.markDone) + ": " + m.title);
+          b.disabled = x.state === "locked";
+          var box = el("span", "box");
+          if (isDone) box.innerHTML = T.checkIcon;
+          b.appendChild(box);
+          var txt = el("span", "t");
+          txt.appendChild(el("span", null, m.title));
+          txt.appendChild(el("small", null, T.activity[m.activity] + " · " + fmtMinutes(m.minutes) + " · " + T.difficulty[m.difficulty] + " · +" + missionXp(m) + " XP"));
+          b.appendChild(txt);
+          b.addEventListener("click", function () { tick(m, !isDone); });
+          row.appendChild(b);
+          ms.appendChild(row);
+        });
+        body.appendChild(ms);
+        li.appendChild(body);
+        ol.appendChild(li);
+      });
+      st.appendChild(ol);
+      wrap.appendChild(st);
+    });
+  }
+
   function renderPlan(plan, isPreview) {
     var pane = $("plan");
     pane.textContent = "";
@@ -252,8 +415,28 @@
       var print = el("button", "btn btn-ghost btn-sm", T.print);
       print.type = "button";
       print.addEventListener("click", function () { window.print(); });
+      var journeyOn = !!(state.chat && state.chat.journey && state.chat.plan === plan);
+      if (!journeyOn && state.chatId) {
+        var start = el("button", "btn btn-primary btn-sm", T.startJourney);
+        start.type = "button";
+        start.id = "start-journey";
+        start.addEventListener("click", function () { start.disabled = true; journeyCall("start"); });
+        actions.appendChild(start);
+      }
       actions.appendChild(copy); actions.appendChild(print);
+      if (journeyOn) {
+        var reset = el("button", "btn btn-ghost btn-sm", T.reset);
+        reset.type = "button";
+        reset.addEventListener("click", function () { if (window.confirm(T.resetConfirm)) journeyCall("reset"); });
+        actions.appendChild(reset);
+      }
       wrap.appendChild(actions);
+      if (!journeyOn && state.chatId) wrap.appendChild(el("p", "start-hint", T.startHint));
+      if (journeyOn) {
+        renderJourney(plan, wrap);
+        pane.appendChild(wrap);
+        return;
+      }
       if (plan.pacing) {
         var pacing = el("div", "pacing");
         pacing.appendChild(el("b", null, T.pacing));

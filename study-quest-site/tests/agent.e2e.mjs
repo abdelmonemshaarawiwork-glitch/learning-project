@@ -63,6 +63,34 @@ await p.getByRole("button", { name: "Copy plan" }).click();
 await p.getByRole("button", { name: "Copied" }).waitFor();
 const clip = await p.evaluate(() => navigator.clipboard.readText());
 check("copy plan as text", /Stage 1/.test(clip) && /Level 1/.test(clip));
+// journey: start, tick missions, levels unlock, progress persists
+await p.getByRole("button", { name: "Start this journey" }).click();
+await p.locator(".journey-progress").waitFor({ timeout: 15000 });
+check("journey starts at 0%", ((await p.locator(".jp-top strong").textContent()) ?? "").trim() === "0%");
+const levels = p.locator(".p-level");
+check("level 1 in progress, level 2 locked", (await levels.nth(0).getAttribute("class")).includes("j-current") && (await levels.nth(1).getAttribute("class")).includes("j-locked"));
+check("locked missions can't be ticked", await levels.nth(1).locator("button.tick").first().isDisabled());
+const ticks = levels.nth(0).locator("button.tick");
+const nTicks = await ticks.count();
+for (let i = 0; i < nTicks; i++) {
+  await p.locator(".p-level").nth(0).locator("button.tick").nth(i).click();
+  await p.waitForTimeout(400);
+}
+await p.locator(".flash").first().waitFor({ timeout: 10000 });
+check("finishing a level celebrates and unlocks the next", /Level 1 complete/.test((await p.locator(".flash").first().textContent()) ?? "") && (await p.locator(".p-level").nth(1).getAttribute("class")).includes("j-current"));
+const pctBefore = parseInt(((await p.locator(".jp-top strong").textContent()) ?? "0").trim(), 10);
+check("progress goes up", pctBefore > 0, pctBefore + "%");
+await p.waitForTimeout(800);
+await p.reload();
+await p.locator(".journey-progress").waitFor({ timeout: 15000 });
+const pctAfter = parseInt(((await p.locator(".jp-top strong").textContent()) ?? "0").trim(), 10);
+check("progress saved after reload", pctAfter === pctBefore, pctAfter + "%");
+check("saved plans list shows progress", /\d+%/.test((await p.locator("#history option").nth(1).textContent()) ?? ""));
+await p.locator(".p-level").nth(0).locator("button.tick").first().click();
+await p.waitForTimeout(600);
+const pctUndo = parseInt(((await p.locator(".jp-top strong").textContent()) ?? "0").trim(), 10);
+check("a mission can be unticked", pctUndo < pctAfter, pctUndo + "%");
+await p.screenshot({ path: `${OUT}/agent-journey.png` });
 // lock
 await p.click("#lock-btn");
 check("lock returns to password screen", await p.locator("#lock").isVisible());

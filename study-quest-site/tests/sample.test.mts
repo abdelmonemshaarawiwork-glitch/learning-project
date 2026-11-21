@@ -40,6 +40,8 @@ describe("follow-ups", () => {
     const r = sampleTurn("Make it shorter", plan, {});
     expect(r.plan_changed).toBe(true);
     expect(totalMinutes(r.plan)).toBeLessThan(totalMinutes(plan));
+    expect(r.plan.stages.every((st) => st.levels.every((l) => l.missions.length === Math.min(2, l.missions.length) && l.missions.length >= 1))).toBe(true);
+    expect(r.plan.stages[0].levels[0].missions).toHaveLength(2);
   });
   it("adds practice", () => {
     const r = sampleTurn("Add more practice questions", plan, {});

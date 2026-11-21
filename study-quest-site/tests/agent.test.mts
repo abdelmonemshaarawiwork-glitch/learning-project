@@ -115,3 +115,39 @@ describe("agent turns", () => {
     expect((await api(req("/api/agent/status?id=job_000000001", { pw: "" }), { ip: "10.1.1.2" })).status).toBe(401);
   });
 });
+
+describe("journeys", () => {
+  it("starts, ticks, unticks and resets; progress shows in the saved list", async () => {
+    await runTurn(runSchema.parse({ jobId: "job_000000010", chatId: "chat_00000010", message: "Photosynthesis" }));
+    const post = (body: unknown) => api(req("/api/agent/chats/chat_00000010/journey", { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } }));
+    expect((await post({ action: "tick", title: "x", done: true })).status).toBe(409);
+    const started = await (await post({ action: "start" })).json();
+    expect(started.journey.done).toEqual({});
+    const chat = await (await api(req("/api/agent/chats/chat_00000010"))).json();
+    const first = chat.plan.stages[0].levels[0].missions[0].title as string;
+    const ticked = await (await post({ action: "tick", title: first, done: true })).json();
+    expect(Object.keys(ticked.journey.done)).toEqual([first.toLowerCase()]);
+    // starting again keeps progress
+    expect(Object.keys((await (await post({ action: "start" })).json()).journey.done)).toHaveLength(1);
+    const list = await (await api(req("/api/agent/chats"))).json();
+    const entry = list.chats.find((c: { id: string }) => c.id === "chat_00000010");
+    expect(entry.progress).toBeGreaterThan(0);
+    const unticked = await (await post({ action: "tick", title: first, done: false })).json();
+    expect(unticked.journey.done).toEqual({});
+    await post({ action: "tick", title: first, done: true });
+    expect((await (await post({ action: "reset" })).json()).journey.done).toEqual({});
+    expect((await post({ action: "bogus" })).status).toBe(400);
+  });
+  it("keeps ticks when the plan is revised but a mission stays", async () => {
+    await runTurn(runSchema.parse({ jobId: "job_000000011", chatId: "chat_00000011", message: "Brachial plexus, including anatomy and branches" }));
+    const post = (body: unknown) => api(req("/api/agent/chats/chat_00000011/journey", { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } }));
+    await post({ action: "start" });
+    const chat = await (await api(req("/api/agent/chats/chat_00000011"))).json();
+    const first = chat.plan.stages[0].levels[0].missions[0].title as string;
+    await post({ action: "tick", title: first, done: true });
+    await runTurn(runSchema.parse({ jobId: "job_000000012", chatId: "chat_00000011", message: "Add more practice questions" }));
+    const after = await (await api(req("/api/agent/chats/chat_00000011"))).json();
+    expect(after.plan.stages[0].levels[0].missions[0].title).toBe(first);
+    expect(after.journey.done[first.toLowerCase()]).toBeTruthy();
+  });
+});
