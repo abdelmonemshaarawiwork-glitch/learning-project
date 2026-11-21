@@ -52,7 +52,7 @@ src/
   lib/i18n/            English + Arabic dictionaries, typed keys, plurals, formatting
   lib/hooks/           live data hooks, timer, plan generation
 firestore.rules        security rules
-tests/unit             57 unit tests (Vitest)
+tests/unit             58 unit tests (Vitest)
 tests/integration      19 tests against the Firebase emulators (services + security rules)
 e2e/                   20 Playwright end-to-end tests
 ```
@@ -112,14 +112,23 @@ The planner uses structured JSON output validated with zod, streams progress to 
 
 ### 3. Deploy (Netlify)
 
-Set all variables from [`.env.example`](.env.example) in **Site configuration → Environment variables**, then deploy this folder (`netlify.toml` is included; Netlify's Next.js runtime handles the API routes). `NEXT_PUBLIC_*` values are baked in at build time, so redeploy after changing them.
+Live site: **https://study-quest-journey.netlify.app** (Netlify project `study-quest-journey`).
+
+1. **Site configuration → Environment variables**: add every variable from [`.env.example`](.env.example) (`NEXT_PUBLIC_FIREBASE_*`, `FIREBASE_SERVICE_ACCOUNT_KEY`, optionally `ANTHROPIC_API_KEY`). `NEXT_PUBLIC_*` values are baked in at build time, so redeploy after changing them.
+2. Deploy, either:
+   * **Continuous deployment** (recommended): *Site configuration → Build & deploy → Link repository* → `learning-project`, **base directory `study-quest`**, build command `npm run build`, publish directory `.next`; or
+   * **CLI** from this folder: `npx netlify-cli deploy --build --prod`.
+3. `netlify.toml` pins Node 22 for builds and uses `@netlify/plugin-nextjs`, which turns the API routes into one Netlify Function.
+4. **Site configuration → Access & security → Visitor access**: keep *Netlify team login* **off** for this site, otherwise visitors see a Netlify sign-in page.
+
+> The server dependencies must load without Node's `require(esm)` (Netlify's runtime refuses it). `package.json` pins `jose@5` for `jwks-rsa` via `overrides`, and `tests/unit/runtime-compat.test.ts` guards this.
 
 ## Tests
 
 | Command | What it covers |
 |---|---|
 | `npm run typecheck` | strict TypeScript |
-| `npm test` | 57 unit tests: dates/timezones/DST, streaks, level states & unlocking, XP curve, achievements, plan validation & progress-preserving merge, sample planner (EN/AR), AI output normalisation, prompt, schedule, reminders, statistics, i18n completeness (both dictionaries share every key and placeholder; Arabic plurals) |
+| `npm test` | 58 unit tests (incl. a Netlify runtime-compatibility check): dates/timezones/DST, streaks, level states & unlocking, XP curve, achievements, plan validation & progress-preserving merge, sample planner (EN/AR), AI output normalisation, prompt, schedule, reminders, statistics, i18n completeness (both dictionaries share every key and placeholder; Arabic plurals) |
 | `npm run test:integration` | 19 tests on the Firebase emulators: bootstrap, settings, quest creation, XP granted once, locked-level refusal, level/stage/quest bonuses, timezone-correct streaks across midnight, unlock/skip, status transitions, edits preserving progress, delete, idempotent sessions & validation, AI quota, export/reset/delete account; **security rules** with the real client SDK (own data readable, others' not, all client writes denied) |
 | `npm run test:e2e` | 20 Playwright tests on the real app + emulators: sign-up/login/logout/validation/duplicate/reset, protected routes, persistence across tabs, planner → quest → unlocking → XP/streak/achievements/activity/statistics, unlock early & skip, focus session (timer, pause, notes autosave, restore after reload, complete, next), tracked session recorded, plan editing keeps progress, pause/resume/archive/restore/delete, manual quest, Arabic RTL + dark mode following the account to another device, goals & reminders, export/reset, delete account, no horizontal overflow at 390/820/1280 px, API rejects anonymous/forged tokens and cross-user access |
 | `npm run build` | production build |
