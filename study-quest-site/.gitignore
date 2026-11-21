@@ -1,0 +1,6 @@
+node_modules
+.netlify
+.local-blobs
+test-results
+playwright-report
+public

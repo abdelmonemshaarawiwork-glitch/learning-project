@@ -1,0 +1,90 @@
+import { chromium, devices } from "@playwright/test";
+const BASE = process.env.BASE ?? "http://localhost:8899";
+const PW = process.env.AGENT_PW ?? "local-dev-password";
+const OUT = process.env.OUT ?? "/tmp/claude-0";
+const b = await chromium.launch();
+const results = [];
+const check = (name, ok, extra = "") => results.push(`${ok ? "PASS" : "FAIL"}  ${name}${extra ? " — " + extra : ""}`);
+const errors = [];
+
+const ctx = await b.newContext({ viewport: { width: 1440, height: 900 } });
+const p = await ctx.newPage();
+p.on("pageerror", (e) => errors.push(e.message));
+p.on("console", (m) => { if (m.type() === "error" && !/401/.test(m.text())) errors.push(m.text()); });
+await p.goto(BASE + "/agent/");
+await p.locator("#pw").waitFor();
+check("lock screen shown", await p.locator("#lock").isVisible());
+await p.fill("#pw", "wrong-password");
+await p.click("#unlock-btn");
+await p.getByText("That password isn't right.").waitFor({ timeout: 10000 });
+check("wrong password refused", true);
+await p.fill("#pw", PW);
+await p.click("#unlock-btn");
+await p.locator("#workspace").waitFor({ state: "visible" });
+check("unlocks with the right password", true);
+await p.getByText("Plan anything you want to learn").waitFor();
+await p.getByRole("button", { name: /brachial plexus/ }).click();
+await p.selectOption("#minutes", "45");
+await p.click("#send-btn");
+await p.locator("#working").waitFor({ timeout: 10000 });
+check("shows a working state", true);
+await p.locator(".plan-head h2").filter({ hasNotText: "Writing" }).first().waitFor({ timeout: 90000 });
+await p.locator(".plan-stats").waitFor({ timeout: 90000 });
+const title = await p.locator(".plan-head h2").textContent();
+check("plan rendered", /plexus/i.test(title ?? ""), title ?? "");
+check("assistant reply shown", (await p.locator(".msg.assistant:not(.working)").count()) === 1);
+check("plan stats", /missions/.test((await p.locator(".plan-stats").textContent()) ?? ""));
+await p.screenshot({ path: `${OUT}/agent-desktop.png` });
+// follow-up via suggestion chip, then reload while it is still being written
+await p.locator("#suggestions .chip").first().click();
+await p.locator("#working").waitFor({ timeout: 10000 });
+await p.reload();
+await p.locator("#workspace").waitFor({ state: "visible" });
+check("in-progress turn resumes after reload", await p.locator("#working").isVisible({ timeout: 5000 }).catch(() => false));
+await p.locator(".msg.assistant:not(.working)").nth(1).waitFor({ timeout: 90000 });
+check("follow-up answered after reload", (await p.locator(".msg.assistant:not(.working)").count()) === 2);
+check("plan updated tag", (await p.locator(".msg .tag").count()) >= 2);
+// saved conversation persists across reload (remembered password)
+await p.reload();
+await p.locator("#workspace").waitFor({ state: "visible" });
+await p.locator(".msg.assistant:not(.working)").nth(1).waitFor({ timeout: 15000 });
+check("conversation restored after reload", (await p.locator(".msg").count()) === 4);
+const opts = await p.locator("#history option").count();
+check("saved plans list", opts === 2, `${opts - 1} saved`);
+// new plan + switching back via history
+await p.click("#new-chat");
+check("new plan clears", (await p.locator(".msg").count()) === 0);
+await p.selectOption("#history", { index: 1 });
+await p.locator(".msg.assistant:not(.working)").nth(1).waitFor({ timeout: 15000 });
+check("open saved plan from history", true);
+// copy text
+await ctx.grantPermissions(["clipboard-read", "clipboard-write"], { origin: BASE });
+await p.getByRole("button", { name: "Copy plan" }).click();
+await p.getByRole("button", { name: "Copied" }).waitFor();
+const clip = await p.evaluate(() => navigator.clipboard.readText());
+check("copy plan as text", /Stage 1/.test(clip) && /Level 1/.test(clip));
+// lock
+await p.click("#lock-btn");
+check("lock returns to password screen", await p.locator("#lock").isVisible());
+await ctx.close();
+
+// Arabic on a phone
+const m = await b.newContext({ ...devices["iPhone 13"] });
+const mp = await m.newPage();
+mp.on("pageerror", (e) => errors.push("ar: " + e.message));
+await mp.goto(BASE + "/ar/agent/");
+await mp.fill("#pw", PW);
+await mp.click("#unlock-btn");
+await mp.locator("#workspace").waitFor({ state: "visible" });
+check("Arabic page is RTL", (await mp.evaluate(() => document.documentElement.dir)) === "rtl");
+await mp.fill("#prompt", "أريد أن أذاكر الضفيرة العضدية");
+await mp.click("#send-btn");
+await mp.locator(".plan-stats").waitFor({ timeout: 90000 });
+check("Arabic plan rendered", /الضفيرة/.test((await mp.locator(".plan-head h2").textContent()) ?? ""));
+check("no horizontal overflow on phone", await mp.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1));
+await mp.screenshot({ path: `${OUT}/agent-phone-ar.png`, fullPage: true });
+await m.close();
+await b.close();
+console.log(results.join("\n"));
+console.log(errors.length ? "PAGE ERRORS:\n" + errors.join("\n") : "no page errors");
+process.exit(results.some((r) => r.startsWith("FAIL")) || errors.length ? 1 : 0);

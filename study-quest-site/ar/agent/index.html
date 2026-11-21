@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>مخطط المذاكرة · رحلة المذاكرة</title>
+<meta name="theme-color" content="#f8f7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191b18" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container bar">
+    <a class="brand" href="/ar/"><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="#526b57"/><path d="M8 23c4.5 0 5-6 8.5-7.5S22 14 24 9" fill="none" stroke="#f8f7f2" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round"/><circle cx="8.5" cy="22.5" r="2.2" fill="#f8f7f2"/><circle cx="16.3" cy="15.8" r="2.2" fill="#f8f7f2"/><circle cx="23.6" cy="9.4" r="2.2" fill="#f8f7f2" fill-opacity=".55"/></svg><span>رحلة المذاكرة</span></a>
+    <nav class="nav" aria-label="رحلة المذاكرة"><a href="/ar/">العودة إلى الموقع</a></nav>
+    <a class="lang" href="/agent/" hreflang="en" lang="en" aria-label="اللغة: English"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 8 6 6"></path><path d="m4 14 6-6 2-3"></path><path d="M2 5h12"></path><path d="M7 2h1"></path><path d="m22 22-5-10-5 10"></path><path d="M14 18h6"></path></svg>English</a>
+  </div>
+</header>
+<main class="agent-main">
+  <div class="container">
+    <section id="lock" hidden>
+      <div class="card lock-card">
+        <div class="seal"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+        <h1>مخطط مذاكرتك</h1>
+        <p>هذه الصفحة خاصة. أدخل كلمة المرور للمتابعة.</p>
+        <form id="lock-form">
+          <label class="sr-only" for="pw" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">كلمة المرور</label>
+          <input class="field" id="pw" type="password" autocomplete="current-password" placeholder="كلمة المرور" dir="ltr" required>
+          <label class="check"><input type="checkbox" id="remember" checked> تذكرني على هذا الجهاز</label>
+          <p class="error" id="lock-error" role="alert"></p>
+          <button class="btn btn-primary" id="unlock-btn" type="submit">فتح</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="workspace" hidden>
+      <div class="agent-top">
+        <h1>مخطط المذاكرة</h1>
+        <div class="tools">
+          <select class="field" id="history" aria-label="الخطط المحفوظة"><option value="">الخطط المحفوظة…</option></select>
+          <button class="btn btn-secondary btn-sm" id="new-chat" type="button">خطة جديدة</button>
+          <button class="btn btn-ghost btn-sm" id="delete-chat" type="button" hidden>حذف</button>
+          <button class="btn btn-ghost btn-sm" id="lock-btn" type="button"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg><span>قفل</span></button>
+        </div>
+      </div>
+      <p class="notice" id="ai-notice" hidden>الذكاء الاصطناعي غير متصل بعد. أضف مفتاح Anthropic API في إعدادات الموقع على Netlify (ANTHROPIC_API_KEY) وسيعمل هنا.</p>
+      <div class="agent-grid">
+        <div class="card chat-pane" id="chat-pane">
+          <div class="messages" id="messages" aria-live="polite"></div>
+          <div class="suggestions chips" id="suggestions" hidden><button type="button" class="chip">اجعلها أقصر</button><button type="button" class="chip">أضف أسئلة تدريب أكثر</button><button type="button" class="chip">اجعلها في أسبوعين</button><button type="button" class="chip">اشرح كيف أذاكر المستوى 1</button></div>
+          <form class="composer" id="composer">
+            <label for="prompt" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">الرسالة</label>
+            <textarea class="field" id="prompt" rows="3" maxlength="4000" dir="auto" placeholder="ماذا تريد أن تذاكر؟ مثال: الضفيرة العضدية — التشريح والفروع والحالات السريرية."></textarea>
+            <div class="row">
+              <div class="opts" id="first-opts">
+                <label class="mini">الوقت يوميًا<select class="field" id="minutes"><option value="">بدون تفضيل</option><option value="15">15 د</option><option value="20">20 د</option><option value="30">30 د</option><option value="45">45 د</option><option value="60">60 د</option><option value="90">90 د</option><option value="120">120 د</option><option value="180">180 د</option></select></label>
+                <label class="mini">الموعد المستهدف<input class="field" id="deadline" type="date"></label>
+              </div>
+              <button class="btn btn-primary btn-sm" id="send-btn" type="submit">إرسال<svg class="flip" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg></button>
+            </div>
+          </form>
+        </div>
+        <aside class="card plan-pane" id="plan" aria-live="polite"></aside>
+      </div>
+    </section>
+  </div>
+</main>
+<script type="application/json" id="agent-i18n">{"introTitle": "خطّط لأي شيء تريد تعلّمه", "introBody": "صِف موضوعًا أو امتحانًا أو هدفًا، وسأنظمه في مراحل ومستويات ومهام — ثم نعدّله معًا.", "examples": ["أريد أن أذاكر الضفيرة العضدية بما في ذلك التشريح، الفروع، العلاقات، والتطبيقات السريرية.", "ساعدني في مراجعة الدورة القلبية لامتحان بعد 10 أيام.", "علّمني أساسيات الإحصاء من أجل بحثي."], "planUpdated": "تم تحديث الخطة", "planEmpty": "ستظهر خطتك هنا.", "writingPlan": "جارٍ كتابة خطتك…", "working": "أفكر في خطتك… {s} ث", "untitled": "خطة بلا عنوان", "deleteConfirm": "حذف هذه الخطة المحفوظة؟", "copy": "نسخ الخطة", "copied": "تم النسخ", "print": "طباعة", "pacing": "الإيقاع", "stage": "المرحلة", "level": "المستوى", "count": {"stages": "{n} مراحل", "levels": "{n} مستويات", "missions": "{n} مهام"}, "units": {"min": "د", "h": "س"}, "activity": {"read": "قراءة", "watch": "مشاهدة", "notes": "تدوين", "recall": "استرجاع نشط", "practice": "تدريب", "quiz": "اختبار", "review": "مراجعة", "diagram": "رسم تخطيطي", "flashcards": "بطاقات", "project": "مشروع"}, "difficulty": {"easy": "سهلة", "medium": "متوسطة", "hard": "صعبة"}, "errors": {"wrong_password": "كلمة المرور غير صحيحة.", "too_many_attempts": "محاولات خاطئة كثيرة. حاول مرة أخرى بعد ساعة.", "not_configured_password": "المخطط غير مُعدّ بعد: أضف AGENT_PASSWORD في إعدادات الموقع على Netlify.", "not_configured_ai": "الذكاء الاصطناعي غير متصل بعد: أضف ANTHROPIC_API_KEY في إعدادات الموقع على Netlify.", "ai_key_rejected": "رفضت Anthropic مفتاح API. تحقق من ANTHROPIC_API_KEY على Netlify.", "ai_busy": "الذكاء الاصطناعي مشغول الآن. حاول مرة أخرى بعد دقيقة.", "ai_unavailable": "تعذّر الوصول إلى الذكاء الاصطناعي. حاول مرة أخرى.", "ai_refused": "لم يتمكن الذكاء الاصطناعي من المساعدة في هذا الطلب. جرّب صياغة أخرى.", "ai_truncated": "الخطة أطول من أن تكتمل. جرّب موضوعًا أضيق.", "ai_invalid": "أعاد الذكاء الاصطناعي نتيجة غير صالحة. حاول مرة أخرى.", "daily_limit": "وصلت إلى حد اليوم. يتجدد غدًا.", "not_started": "لم يبدأ الطلب. حاول مرة أخرى.", "timeout": "استغرق الأمر وقتًا طويلًا. حاول مرة أخرى.", "network": "تعذّر الوصول إلى الخادم. تحقق من اتصالك.", "server_error": "حدث خطأ ما. حاول مرة أخرى."}, "mapIcon": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z\"><\/path><path d=\"M15 5.764v15\"><\/path><path d=\"M9 3.236v15\"><\/path><\/svg>"}</script>
+<script src="/assets/agent.js" defer></script>
+</body>
+</html>

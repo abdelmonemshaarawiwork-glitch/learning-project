@@ -1,0 +1,402 @@
+/* Study Quest — private study planner (client). No dependencies.
+ * All model text is inserted with textContent (never innerHTML). */
+(function () {
+  "use strict";
+  var T = JSON.parse(document.getElementById("agent-i18n").textContent);
+  var LOCALE = document.documentElement.lang === "ar" ? "ar" : "en";
+  var PW_KEY = "sq_agent_pw";
+  var CHAT_KEY = "sq_agent_chat";
+  var JOB_KEY = "sq_agent_job";
+  var $ = function (id) { return document.getElementById(id); };
+
+  var state = { password: null, chatId: null, chat: null, busy: false, aiConfigured: true };
+
+  // ---------- storage helpers (never fatal) ----------
+  function loadPw() {
+    try { return localStorage.getItem(PW_KEY) || sessionStorage.getItem(PW_KEY); } catch (e) { return null; }
+  }
+  function savePw(pw, remember) {
+    try {
+      localStorage.removeItem(PW_KEY); sessionStorage.removeItem(PW_KEY);
+      (remember ? localStorage : sessionStorage).setItem(PW_KEY, pw);
+    } catch (e) { /* storage unavailable: stays in memory */ }
+  }
+  function clearPw() { try { localStorage.removeItem(PW_KEY); sessionStorage.removeItem(PW_KEY); } catch (e) {} }
+  function setLastChat(id) { try { id ? localStorage.setItem(CHAT_KEY, id) : localStorage.removeItem(CHAT_KEY); } catch (e) {} }
+  function getLastChat() { try { return localStorage.getItem(CHAT_KEY); } catch (e) { return null; } }
+  function setPendingJob(j) { try { j ? localStorage.setItem(JOB_KEY, JSON.stringify(j)) : localStorage.removeItem(JOB_KEY); } catch (e) {} }
+  function getPendingJob() { try { return JSON.parse(localStorage.getItem(JOB_KEY) || "null"); } catch (e) { return null; } }
+
+  function el(tag, cls, text) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (text !== undefined && text !== null) {
+      e.textContent = text;
+      e.setAttribute("dir", "auto"); // Arabic text inside the English page (and vice versa) reads correctly
+    }
+    return e;
+  }
+  function uid() {
+    if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    return "id" + Date.now().toString(36) + Math.random().toString(36).slice(2, 12);
+  }
+  function errText(code) { return T.errors[code] || T.errors.server_error; }
+  function fmtMinutes(m) {
+    var h = Math.floor(m / 60), r = m % 60;
+    if (!h) return m + " " + T.units.min;
+    return r ? h + " " + T.units.h + " " + r + " " + T.units.min : h + " " + T.units.h;
+  }
+
+  // ---------- API ----------
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = { "x-agent-password": state.password || "" };
+    if (opts.body) headers["content-type"] = "application/json";
+    return fetch(path, { method: opts.method || "GET", headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined, cache: "no-store" })
+      .then(function (r) {
+        return r.text().then(function (txt) {
+          var data = null;
+          try { data = txt ? JSON.parse(txt) : null; } catch (e) { data = null; }
+          return { status: r.status, data: data };
+        });
+      }, function () { return { status: 0, data: { error: "network" } }; });
+  }
+
+  // ---------- lock screen ----------
+  function showLock(message) {
+    $("workspace").hidden = true;
+    $("lock").hidden = false;
+    $("lock-error").textContent = message || "";
+    $("pw").value = "";
+    setTimeout(function () { $("pw").focus(); }, 30);
+  }
+  function unlock(pw, remember, silent) {
+    state.password = pw;
+    var btn = $("unlock-btn");
+    btn.disabled = true;
+    return api("/api/agent/auth", { method: "POST", body: {} }).then(function (r) {
+      btn.disabled = false;
+      if (r.status === 200) {
+        if (!silent) savePw(pw, remember);
+        state.aiConfigured = !!(r.data && r.data.aiConfigured);
+        openWorkspace();
+        return;
+      }
+      clearPw();
+      state.password = null;
+      showLock(errText((r.data && r.data.error) || (r.status === 0 ? "network" : "server_error")));
+    });
+  }
+
+  // ---------- workspace ----------
+  function openWorkspace() {
+    $("lock").hidden = true;
+    $("workspace").hidden = false;
+    $("ai-notice").hidden = state.aiConfigured;
+    refreshHistory();
+    var pending = getPendingJob();
+    var last = getLastChat();
+    if (pending && Date.now() - pending.started < 15 * 60 * 1000) {
+      // A turn was still running when the page was closed: show it and keep waiting.
+      loadChat(pending.chatId, function () { track(pending); });
+    } else {
+      setPendingJob(null);
+      if (last) loadChat(last); else renderAll();
+    }
+    setTimeout(function () { $("prompt").focus(); }, 30);
+  }
+
+  function refreshHistory() {
+    api("/api/agent/chats").then(function (r) {
+      var sel = $("history");
+      while (sel.options.length > 1) sel.remove(1);
+      var chats = (r.data && r.data.chats) || [];
+      chats.forEach(function (c) {
+        var o = el("option", null, c.title || T.untitled);
+        o.value = c.id;
+        sel.appendChild(o);
+      });
+      sel.value = state.chatId && chats.some(function (c) { return c.id === state.chatId; }) ? state.chatId : "";
+      sel.disabled = chats.length === 0;
+    });
+  }
+
+  function loadChat(id, then) {
+    api("/api/agent/chats/" + encodeURIComponent(id)).then(function (r) {
+      if (r.status === 200 && r.data) {
+        state.chatId = r.data.id;
+        state.chat = r.data;
+        setLastChat(r.data.id);
+      } else {
+        state.chatId = null; state.chat = null; setLastChat(null);
+      }
+      renderAll();
+      refreshHistory();
+      if (then) then();
+    });
+  }
+
+  function newChat() {
+    if (state.busy) return;
+    state.chatId = null; state.chat = null; setLastChat(null);
+    $("history").value = "";
+    renderAll();
+    $("prompt").focus();
+  }
+
+  // ---------- rendering ----------
+  function renderAll() {
+    renderMessages();
+    renderPlan(state.chat && state.chat.plan, false);
+    var first = !state.chat || !state.chat.turns || state.chat.turns.length === 0;
+    $("first-opts").hidden = !first;
+    $("suggestions").hidden = first || !(state.chat && state.chat.plan);
+    $("delete-chat").hidden = !state.chatId;
+  }
+
+  function renderMessages(extraUser, working) {
+    var box = $("messages");
+    box.textContent = "";
+    var turns = (state.chat && state.chat.turns) || [];
+    if (!turns.length && !extraUser) {
+      var intro = el("div", "intro");
+      intro.appendChild(el("h2", null, T.introTitle));
+      intro.appendChild(el("p", null, T.introBody));
+      var chips = el("div", "chips");
+      T.examples.forEach(function (ex) {
+        var b = el("button", "chip", ex);
+        b.type = "button";
+        b.addEventListener("click", function () { $("prompt").value = ex; $("prompt").focus(); });
+        chips.appendChild(b);
+      });
+      intro.appendChild(chips);
+      box.appendChild(intro);
+    }
+    turns.forEach(function (t) {
+      var m = el("div", "msg " + t.role, t.text);
+      if (t.role === "assistant" && t.planChanged) m.appendChild(el("span", "tag", T.planUpdated));
+      box.appendChild(m);
+    });
+    if (extraUser) box.appendChild(el("div", "msg user", extraUser));
+    if (working) {
+      var w = el("div", "msg assistant working");
+      w.appendChild(el("span", "spinner"));
+      w.appendChild(el("span", null, working));
+      w.id = "working";
+      box.appendChild(w);
+    }
+    box.scrollTop = box.scrollHeight;
+    var pane = $("chat-pane");
+    if (pane.getBoundingClientRect().bottom > window.innerHeight && (extraUser || working)) {
+      box.lastChild && box.lastChild.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
+  }
+
+  function planToText(p) {
+    var lines = [p.title, "", p.summary];
+    if (p.pacing) lines.push("", T.pacing + ": " + p.pacing);
+    var n = 0;
+    p.stages.forEach(function (s, si) {
+      lines.push("", T.stage + " " + (si + 1) + " — " + s.title);
+      s.levels.forEach(function (l) {
+        n++;
+        lines.push("  " + T.level + " " + n + ": " + l.title);
+        l.objectives.forEach(function (o) { lines.push("    • " + o); });
+        l.missions.forEach(function (m) { lines.push("    - " + m.title + " (" + T.activity[m.activity] + ", " + fmtMinutes(m.minutes) + ", " + T.difficulty[m.difficulty] + ")"); });
+      });
+    });
+    return lines.join("\n");
+  }
+
+  function renderPlan(plan, isPreview) {
+    var pane = $("plan");
+    pane.textContent = "";
+    if (!plan || !plan.stages || !plan.stages.length) {
+      var empty = el("div", "plan-empty");
+      empty.innerHTML = T.mapIcon; // static icon markup from the page, not model output
+      empty.appendChild(el("p", null, isPreview ? T.writingPlan : T.planEmpty));
+      pane.appendChild(empty);
+      return;
+    }
+    var wrap = el("div", isPreview ? "preview" : "fade-in");
+    var head = el("div", "plan-head");
+    head.appendChild(el("h2", null, plan.title || (isPreview ? T.writingPlan : "")));
+    if (!isPreview && plan.summary) head.appendChild(el("p", null, plan.summary));
+    wrap.appendChild(head);
+
+    if (!isPreview) {
+      var missions = 0, minutes = 0, levels = 0;
+      plan.stages.forEach(function (s) { s.levels.forEach(function (l) { levels++; l.missions.forEach(function (m) { missions++; minutes += m.minutes; }); }); });
+      var stats = el("div", "plan-stats");
+      [T.count.stages.replace("{n}", plan.stages.length), T.count.levels.replace("{n}", levels), T.count.missions.replace("{n}", missions), fmtMinutes(minutes)].forEach(function (s) { stats.appendChild(el("span", "chip", s)); });
+      wrap.appendChild(stats);
+      var actions = el("div", "plan-actions");
+      var copy = el("button", "btn btn-secondary btn-sm", T.copy);
+      copy.type = "button";
+      copy.addEventListener("click", function () {
+        var txt = planToText(plan);
+        (navigator.clipboard ? navigator.clipboard.writeText(txt) : Promise.reject()).then(function () {
+          copy.textContent = T.copied; setTimeout(function () { copy.textContent = T.copy; }, 1600);
+        }, function () { window.prompt(T.copy, txt); });
+      });
+      var print = el("button", "btn btn-ghost btn-sm", T.print);
+      print.type = "button";
+      print.addEventListener("click", function () { window.print(); });
+      actions.appendChild(copy); actions.appendChild(print);
+      wrap.appendChild(actions);
+      if (plan.pacing) {
+        var pacing = el("div", "pacing");
+        pacing.appendChild(el("b", null, T.pacing));
+        pacing.appendChild(document.createTextNode(plan.pacing));
+        wrap.appendChild(pacing);
+      }
+    }
+
+    var n = 0;
+    plan.stages.forEach(function (s, si) {
+      var st = el("section", "p-stage");
+      var title = el("div", "stage-title", T.stage + " " + (si + 1) + " ");
+      title.appendChild(el("b", null, s.title));
+      st.appendChild(title);
+      var ol = el("ol", "levels");
+      (s.levels || []).forEach(function (l) {
+        n++;
+        var li = el("li", "p-level");
+        li.appendChild(el("span", "node", String(n)));
+        var body = el("div");
+        body.appendChild(el("h3", null, isPreview ? l : l.title));
+        if (!isPreview) {
+          if (l.objectives && l.objectives.length) {
+            var ul = el("ul", "objectives");
+            l.objectives.forEach(function (o) { ul.appendChild(el("li", null, o)); });
+            body.appendChild(ul);
+          }
+          var ms = el("ul", "missions");
+          l.missions.forEach(function (m) {
+            var row = el("li");
+            row.appendChild(el("span", null, m.title));
+            row.appendChild(el("small", null, T.activity[m.activity] + " · " + fmtMinutes(m.minutes) + " · " + T.difficulty[m.difficulty]));
+            ms.appendChild(row);
+          });
+          body.appendChild(ms);
+        }
+        li.appendChild(body);
+        ol.appendChild(li);
+      });
+      st.appendChild(ol);
+      wrap.appendChild(st);
+    });
+    pane.appendChild(wrap);
+  }
+
+  // ---------- sending a turn ----------
+  function send(text) {
+    text = (text || "").trim();
+    if (!text || state.busy) return;
+    if (!state.aiConfigured) { $("ai-notice").hidden = false; return; }
+    state.busy = true;
+    var isFirst = !state.chat || !state.chat.turns || !state.chat.turns.length;
+    var chatId = state.chatId || uid();
+    var jobId = uid();
+    var body = { jobId: jobId, chatId: chatId, message: text, locale: LOCALE };
+    if (isFirst) {
+      var mins = Number($("minutes").value);
+      if (mins) body.minutesPerDay = mins;
+      if ($("deadline").value) body.deadline = $("deadline").value;
+    }
+    $("prompt").value = "";
+    var job = { jobId: jobId, chatId: chatId, text: text, started: Date.now(), hadChat: !isFirst };
+    setPendingJob(job);
+    track(job, body);
+  }
+
+  /** Start (when body is given) and/or follow a running turn until it finishes. */
+  function track(job, body) {
+    state.busy = true;
+    $("send-btn").disabled = true;
+    var workingText = function () { return T.working.replace("{s}", Math.round((Date.now() - job.started) / 1000)); };
+    renderMessages(job.text, workingText());
+    var misses = 0;
+
+    if (body) {
+      api("/api/agent/run", { method: "POST", body: body }).then(function (r) {
+        if (r.status !== 202 && r.status !== 200) return finish((r.data && r.data.error) || "server_error");
+        poll();
+      });
+    } else {
+      poll();
+    }
+
+    function poll() {
+      setTimeout(function () {
+        api("/api/agent/status?id=" + encodeURIComponent(job.jobId)).then(function (r) {
+          var w = document.getElementById("working");
+          if (w && w.lastChild) w.lastChild.textContent = workingText();
+          if (r.status === 404) {
+            misses++;
+            return misses > 20 ? finish("not_started") : poll();
+          }
+          if (r.status === 401 || r.status === 429) {
+            setPendingJob(null); clearPw(); state.busy = false; $("send-btn").disabled = false;
+            return showLock(errText(r.data && r.data.error));
+          }
+          if (r.status !== 200 || !r.data) {
+            misses++;
+            return misses > 20 ? finish("network") : poll();
+          }
+          var j = r.data;
+          if (j.state === "running") {
+            if (j.preview && j.preview.stages && j.preview.stages.length) {
+              renderPlan({ title: j.preview.title, stages: j.preview.stages.map(function (s) { return { title: s.title, levels: s.levels }; }) }, true);
+            }
+            if (Date.now() - job.started > 15 * 60 * 1000) return finish("timeout");
+            return poll();
+          }
+          if (j.state === "error") return finish(j.code);
+          if (j.state === "done") return finish(null);
+          poll();
+        });
+      }, 1500);
+    }
+
+    function finish(error) {
+      state.busy = false;
+      setPendingJob(null);
+      $("send-btn").disabled = false;
+      if (error) {
+        renderMessages();
+        renderPlan(state.chat && state.chat.plan, false);
+        $("messages").appendChild(el("p", "error", errText(error)));
+        if (!$("prompt").value) $("prompt").value = job.text;
+        return;
+      }
+      setLastChat(job.chatId);
+      loadChat(job.chatId);
+    }
+  }
+
+  // ---------- wire up ----------
+  $("lock-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var pw = $("pw").value;
+    if (!pw) { $("lock-error").textContent = T.errors.wrong_password; return; }
+    unlock(pw, $("remember").checked, false);
+  });
+  $("composer").addEventListener("submit", function (e) { e.preventDefault(); send($("prompt").value); });
+  $("prompt").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); send($("prompt").value); }
+  });
+  $("new-chat").addEventListener("click", newChat);
+  $("lock-btn").addEventListener("click", function () { clearPw(); state.password = null; state.chat = null; state.chatId = null; showLock(""); });
+  $("history").addEventListener("change", function (e) { if (e.target.value && !state.busy) loadChat(e.target.value); });
+  $("delete-chat").addEventListener("click", function () {
+    if (!state.chatId || state.busy || !window.confirm(T.deleteConfirm)) return;
+    api("/api/agent/chats/" + encodeURIComponent(state.chatId), { method: "DELETE" }).then(function () { newChat(); refreshHistory(); });
+  });
+  Array.prototype.forEach.call(document.querySelectorAll("#suggestions .chip"), function (b) {
+    b.addEventListener("click", function () { send(b.textContent); });
+  });
+
+  var saved = loadPw();
+  if (saved) unlock(saved, true, true); else showLock("");
+})();

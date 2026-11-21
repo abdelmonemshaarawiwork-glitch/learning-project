@@ -111,6 +111,7 @@ COPY = {
         "closing_title": "Every topic, one calm step at a time.",
         "closing_text": "Study Quest helps you know where you are, what you've accomplished, what comes next — and how far you've come.",
         "footer": "A calm, structured way to study.",
+        "planner_link": "My study planner",
         "lang_label": "Language",
     },
     "ar": {
@@ -199,7 +200,141 @@ COPY = {
         "closing_title": "كل موضوع، خطوة هادئة في كل مرة.",
         "closing_text": "تساعدك رحلة المذاكرة على معرفة أين أنت، وماذا أنجزت، وما الخطوة التالية — وكم قطعت من الطريق.",
         "footer": "طريقة هادئة ومنظمة للمذاكرة.",
+        "planner_link": "مخطط مذاكرتي",
         "lang_label": "اللغة",
+    },
+}
+
+AGENT = {
+    "en": {
+        "page_title": "Study planner · Study Quest",
+        "back": "Back to the website",
+        "lock_title": "Your study planner",
+        "lock_text": "This page is private. Enter your password to continue.",
+        "password": "Password",
+        "remember": "Remember me on this device",
+        "unlock": "Unlock",
+        "title": "Study planner",
+        "new_chat": "New plan",
+        "history": "Saved plans",
+        "history_placeholder": "Saved plans…",
+        "delete": "Delete",
+        "lock": "Lock",
+        "ai_notice": "The AI isn't connected yet. Add your Anthropic API key to the site's settings on Netlify (ANTHROPIC_API_KEY), then it will work here.",
+        "prompt_label": "Message",
+        "prompt_placeholder": "What do you want to study? e.g. The brachial plexus — anatomy, branches and clinical cases.",
+        "minutes": "Time per day",
+        "minutes_any": "No preference",
+        "deadline": "Target date",
+        "send": "Send",
+        "suggestions": ["Make it shorter", "Add more practice questions", "Fit it into 2 weeks", "Explain how to study level 1"],
+        "i18n": {
+            "introTitle": "Plan anything you want to learn",
+            "introBody": "Describe a topic, an exam or a goal. I'll organise it into stages, levels and missions — then we can adjust it together.",
+            "examples": [
+                "I want to study the brachial plexus, including anatomy, branches, relations and clinical applications.",
+                "Help me revise the cardiac cycle for an exam in 10 days.",
+                "Teach me the basics of statistics for my research.",
+            ],
+            "planUpdated": "Plan updated",
+            "planEmpty": "Your plan will appear here.",
+            "writingPlan": "Writing your plan…",
+            "working": "Thinking about your plan… {s}s",
+            "untitled": "Untitled plan",
+            "deleteConfirm": "Delete this saved plan?",
+            "copy": "Copy plan",
+            "copied": "Copied",
+            "print": "Print",
+            "pacing": "Pacing",
+            "stage": "Stage",
+            "level": "Level",
+            "count": {"stages": "{n} stages", "levels": "{n} levels", "missions": "{n} missions"},
+            "units": {"min": "min", "h": "h"},
+            "activity": {"read": "Read", "watch": "Watch", "notes": "Notes", "recall": "Active recall", "practice": "Practice", "quiz": "Quiz", "review": "Review", "diagram": "Diagram", "flashcards": "Flashcards", "project": "Project"},
+            "difficulty": {"easy": "Easy", "medium": "Medium", "hard": "Hard"},
+            "errors": {
+                "wrong_password": "That password isn't right.",
+                "too_many_attempts": "Too many wrong attempts. Try again in an hour.",
+                "not_configured_password": "The planner isn't set up yet: add AGENT_PASSWORD in the site's Netlify settings.",
+                "not_configured_ai": "The AI isn't connected yet: add ANTHROPIC_API_KEY in the site's Netlify settings.",
+                "ai_key_rejected": "Anthropic rejected the API key. Check ANTHROPIC_API_KEY on Netlify.",
+                "ai_busy": "The AI is busy right now. Please try again in a minute.",
+                "ai_unavailable": "The AI couldn't be reached. Please try again.",
+                "ai_refused": "The AI couldn't help with that request. Try rephrasing it.",
+                "ai_truncated": "The plan was too long to finish. Try a narrower topic.",
+                "ai_invalid": "The AI returned something unusable. Please try again.",
+                "daily_limit": "You've reached today's limit. It resets tomorrow.",
+                "not_started": "The request didn't start. Please try again.",
+                "timeout": "This is taking too long. Please try again.",
+                "network": "Can't reach the server. Check your connection.",
+                "server_error": "Something went wrong. Please try again.",
+            },
+        },
+    },
+    "ar": {
+        "page_title": "مخطط المذاكرة · رحلة المذاكرة",
+        "back": "العودة إلى الموقع",
+        "lock_title": "مخطط مذاكرتك",
+        "lock_text": "هذه الصفحة خاصة. أدخل كلمة المرور للمتابعة.",
+        "password": "كلمة المرور",
+        "remember": "تذكرني على هذا الجهاز",
+        "unlock": "فتح",
+        "title": "مخطط المذاكرة",
+        "new_chat": "خطة جديدة",
+        "history": "الخطط المحفوظة",
+        "history_placeholder": "الخطط المحفوظة…",
+        "delete": "حذف",
+        "lock": "قفل",
+        "ai_notice": "الذكاء الاصطناعي غير متصل بعد. أضف مفتاح Anthropic API في إعدادات الموقع على Netlify (ANTHROPIC_API_KEY) وسيعمل هنا.",
+        "prompt_label": "الرسالة",
+        "prompt_placeholder": "ماذا تريد أن تذاكر؟ مثال: الضفيرة العضدية — التشريح والفروع والحالات السريرية.",
+        "minutes": "الوقت يوميًا",
+        "minutes_any": "بدون تفضيل",
+        "deadline": "الموعد المستهدف",
+        "send": "إرسال",
+        "suggestions": ["اجعلها أقصر", "أضف أسئلة تدريب أكثر", "اجعلها في أسبوعين", "اشرح كيف أذاكر المستوى 1"],
+        "i18n": {
+            "introTitle": "خطّط لأي شيء تريد تعلّمه",
+            "introBody": "صِف موضوعًا أو امتحانًا أو هدفًا، وسأنظمه في مراحل ومستويات ومهام — ثم نعدّله معًا.",
+            "examples": [
+                "أريد أن أذاكر الضفيرة العضدية بما في ذلك التشريح، الفروع، العلاقات، والتطبيقات السريرية.",
+                "ساعدني في مراجعة الدورة القلبية لامتحان بعد 10 أيام.",
+                "علّمني أساسيات الإحصاء من أجل بحثي.",
+            ],
+            "planUpdated": "تم تحديث الخطة",
+            "planEmpty": "ستظهر خطتك هنا.",
+            "writingPlan": "جارٍ كتابة خطتك…",
+            "working": "أفكر في خطتك… {s} ث",
+            "untitled": "خطة بلا عنوان",
+            "deleteConfirm": "حذف هذه الخطة المحفوظة؟",
+            "copy": "نسخ الخطة",
+            "copied": "تم النسخ",
+            "print": "طباعة",
+            "pacing": "الإيقاع",
+            "stage": "المرحلة",
+            "level": "المستوى",
+            "count": {"stages": "{n} مراحل", "levels": "{n} مستويات", "missions": "{n} مهام"},
+            "units": {"min": "د", "h": "س"},
+            "activity": {"read": "قراءة", "watch": "مشاهدة", "notes": "تدوين", "recall": "استرجاع نشط", "practice": "تدريب", "quiz": "اختبار", "review": "مراجعة", "diagram": "رسم تخطيطي", "flashcards": "بطاقات", "project": "مشروع"},
+            "difficulty": {"easy": "سهلة", "medium": "متوسطة", "hard": "صعبة"},
+            "errors": {
+                "wrong_password": "كلمة المرور غير صحيحة.",
+                "too_many_attempts": "محاولات خاطئة كثيرة. حاول مرة أخرى بعد ساعة.",
+                "not_configured_password": "المخطط غير مُعدّ بعد: أضف AGENT_PASSWORD في إعدادات الموقع على Netlify.",
+                "not_configured_ai": "الذكاء الاصطناعي غير متصل بعد: أضف ANTHROPIC_API_KEY في إعدادات الموقع على Netlify.",
+                "ai_key_rejected": "رفضت Anthropic مفتاح API. تحقق من ANTHROPIC_API_KEY على Netlify.",
+                "ai_busy": "الذكاء الاصطناعي مشغول الآن. حاول مرة أخرى بعد دقيقة.",
+                "ai_unavailable": "تعذّر الوصول إلى الذكاء الاصطناعي. حاول مرة أخرى.",
+                "ai_refused": "لم يتمكن الذكاء الاصطناعي من المساعدة في هذا الطلب. جرّب صياغة أخرى.",
+                "ai_truncated": "الخطة أطول من أن تكتمل. جرّب موضوعًا أضيق.",
+                "ai_invalid": "أعاد الذكاء الاصطناعي نتيجة غير صالحة. حاول مرة أخرى.",
+                "daily_limit": "وصلت إلى حد اليوم. يتجدد غدًا.",
+                "not_started": "لم يبدأ الطلب. حاول مرة أخرى.",
+                "timeout": "استغرق الأمر وقتًا طويلًا. حاول مرة أخرى.",
+                "network": "تعذّر الوصول إلى الخادم. تحقق من اتصالك.",
+                "server_error": "حدث خطأ ما. حاول مرة أخرى.",
+            },
+        },
     },
 }
 
@@ -378,7 +513,7 @@ def render(lang: str) -> str:
 <footer class="site-footer">
   <div class="container row">
     <span class="brand">{LOGO}<span>{esc(c['brand'])}</span></span>
-    <span>{esc(c['footer'])}</span>
+    <span>{esc(c['footer'])} · <a href="{c['path']}agent/" style="color:inherit">{esc(c['planner_link'])}</a></span>
     <a class="lang" href="{other_path}" hreflang="{other_lang}" lang="{other_lang}">{icon('languages')}{esc(other_name)}</a>
   </div>
 </footer>
@@ -403,11 +538,102 @@ def render(lang: str) -> str:
 """
 
 
+def render_agent(lang: str) -> str:
+    c = COPY[lang]
+    a = AGENT[lang]
+    other_lang, other_path, other_name = c["other"]
+    other_agent = other_path + "agent/"
+    home = c["path"]
+    i18n = dict(a["i18n"])
+    i18n["mapIcon"] = icon("map")
+    i18n_json = json.dumps(i18n, ensure_ascii=False).replace("</", "<\\/")
+    minute_opts = "".join(f'<option value="{m}">{m} {esc(i18n["units"]["min"])}</option>' for m in (15, 20, 30, 45, 60, 90, 120, 180))
+    sugg = "".join(f'<button type="button" class="chip">{esc(x)}</button>' for x in a["suggestions"])
+    return f"""<!doctype html>
+<html lang="{lang}" dir="{c['dir']}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>{esc(a['page_title'])}</title>
+<meta name="theme-color" content="#f8f7f2" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#191b18" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+<header class="site-header">
+  <div class="container bar">
+    <a class="brand" href="{home}">{LOGO}<span>{esc(c['brand'])}</span></a>
+    <nav class="nav" aria-label="{esc(c['brand'])}"><a href="{home}">{esc(a['back'])}</a></nav>
+    <a class="lang" href="{other_agent}" hreflang="{other_lang}" lang="{other_lang}" aria-label="{esc(c['lang_label'])}: {esc(other_name)}">{icon('languages')}{esc(other_name)}</a>
+  </div>
+</header>
+<main class="agent-main">
+  <div class="container">
+    <section id="lock" hidden>
+      <div class="card lock-card">
+        <div class="seal">{icon('lock')}</div>
+        <h1>{esc(a['lock_title'])}</h1>
+        <p>{esc(a['lock_text'])}</p>
+        <form id="lock-form">
+          <label class="sr-only" for="pw" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{esc(a['password'])}</label>
+          <input class="field" id="pw" type="password" autocomplete="current-password" placeholder="{esc(a['password'])}" dir="ltr" required>
+          <label class="check"><input type="checkbox" id="remember" checked> {esc(a['remember'])}</label>
+          <p class="error" id="lock-error" role="alert"></p>
+          <button class="btn btn-primary" id="unlock-btn" type="submit">{esc(a['unlock'])}</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="workspace" hidden>
+      <div class="agent-top">
+        <h1>{esc(a['title'])}</h1>
+        <div class="tools">
+          <select class="field" id="history" aria-label="{esc(a['history'])}"><option value="">{esc(a['history_placeholder'])}</option></select>
+          <button class="btn btn-secondary btn-sm" id="new-chat" type="button">{esc(a['new_chat'])}</button>
+          <button class="btn btn-ghost btn-sm" id="delete-chat" type="button" hidden>{esc(a['delete'])}</button>
+          <button class="btn btn-ghost btn-sm" id="lock-btn" type="button">{icon('lock')}<span>{esc(a['lock'])}</span></button>
+        </div>
+      </div>
+      <p class="notice" id="ai-notice" hidden>{esc(a['ai_notice'])}</p>
+      <div class="agent-grid">
+        <div class="card chat-pane" id="chat-pane">
+          <div class="messages" id="messages" aria-live="polite"></div>
+          <div class="suggestions chips" id="suggestions" hidden>{sugg}</div>
+          <form class="composer" id="composer">
+            <label for="prompt" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">{esc(a['prompt_label'])}</label>
+            <textarea class="field" id="prompt" rows="3" maxlength="4000" dir="auto" placeholder="{esc(a['prompt_placeholder'])}"></textarea>
+            <div class="row">
+              <div class="opts" id="first-opts">
+                <label class="mini">{esc(a['minutes'])}<select class="field" id="minutes"><option value="">{esc(a['minutes_any'])}</option>{minute_opts}</select></label>
+                <label class="mini">{esc(a['deadline'])}<input class="field" id="deadline" type="date"></label>
+              </div>
+              <button class="btn btn-primary btn-sm" id="send-btn" type="submit">{esc(a['send'])}{icon('arrowRight', 'flip')}</button>
+            </div>
+          </form>
+        </div>
+        <aside class="card plan-pane" id="plan" aria-live="polite"></aside>
+      </div>
+    </section>
+  </div>
+</main>
+<script type="application/json" id="agent-i18n">{i18n_json}</script>
+<script src="/assets/agent.js" defer></script>
+</body>
+</html>
+"""
+
+
 def main() -> None:
     (ROOT / "index.html").write_text(render("en"), encoding="utf-8")
     (ROOT / "ar").mkdir(exist_ok=True)
     (ROOT / "ar" / "index.html").write_text(render("ar"), encoding="utf-8")
-    print("built index.html and ar/index.html")
+    (ROOT / "agent").mkdir(exist_ok=True)
+    (ROOT / "agent" / "index.html").write_text(render_agent("en"), encoding="utf-8")
+    (ROOT / "ar" / "agent").mkdir(parents=True, exist_ok=True)
+    (ROOT / "ar" / "agent" / "index.html").write_text(render_agent("ar"), encoding="utf-8")
+    print("built index.html, ar/index.html, agent/index.html, ar/agent/index.html")
 
 
 if __name__ == "__main__":
