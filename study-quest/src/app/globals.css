@@ -1,0 +1,214 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* ------------------------------------------------------------------
+   Design tokens — "calm gamification / warm minimal"
+   ------------------------------------------------------------------ */
+:root {
+  --canvas: #f8f7f2;          /* warm off-white page */
+  --surface: #ffffff;         /* cards */
+  --surface-2: #f4f2ec;       /* subtle wells, inputs */
+  --muted: #eae8e0;           /* soft warm gray (tracks, dividers) */
+  --line: #e4e1d7;            /* hairline borders */
+  --ink: #303630;             /* primary text (charcoal) */
+  --ink-2: #6f746b;           /* secondary text */
+  --ink-3: #858980;           /* tertiary / meta (secondary gray) */
+  --sage: #829783;            /* primary */
+  --sage-strong: #526b57;     /* deep sage: emphasis, text on soft */
+  --sage-soft: #e6ece3;       /* pale sage fill */
+  --sage-ink: #ffffff;        /* text on sage */
+  --beige: #efe7d8;           /* soft beige */
+  --olive: #e6e7d2;           /* pale olive */
+  --olive-strong: #6e7146;
+  --lavender: #e9e5f1;        /* muted lavender */
+  --lavender-strong: #6f6794;
+  --honey: #f7efd6;           /* very subtle warm yellow */
+  --honey-strong: #94783a;
+  --danger: #a65d54;
+  --danger-soft: #f6e6e2;
+  --focus: #526b57;
+  --shadow-sm: 0 1px 2px rgba(48, 54, 48, 0.04), 0 1px 1px rgba(48, 54, 48, 0.03);
+  --shadow-md: 0 1px 2px rgba(48, 54, 48, 0.04), 0 6px 18px -6px rgba(48, 54, 48, 0.08);
+  --shadow-lg: 0 2px 6px rgba(48, 54, 48, 0.05), 0 20px 40px -16px rgba(48, 54, 48, 0.16);
+  /* Sequential study-intensity ramp (validated: one hue, monotone L, light end >= 2:1 on surface) */
+  --heat-0: #eeece5;
+  --heat-1: #a5baa3;
+  --heat-2: #86a084;
+  --heat-3: #62806a;
+  --heat-4: #42604a;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --canvas: #191b18;
+  --surface: #212420;
+  --surface-2: #272a25;
+  --muted: #2f332d;
+  --line: #333830;
+  --ink: #e8e7df;
+  --ink-2: #b4b7ac;
+  --ink-3: #8e9287;
+  --sage: #8fa690;
+  --sage-strong: #b7c9b6;
+  --sage-soft: #2b352c;
+  --sage-ink: #141713;
+  --beige: #34302a;
+  --olive: #30321f;
+  --olive-strong: #c9cc9c;
+  --lavender: #2e2b38;
+  --lavender-strong: #bdb5df;
+  --honey: #353022;
+  --honey-strong: #d9be7c;
+  --danger: #d88f85;
+  --danger-soft: #3a2724;
+  --focus: #b7c9b6;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 1px 2px rgba(0, 0, 0, 0.3), 0 8px 20px -8px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.35), 0 24px 44px -16px rgba(0, 0, 0, 0.6);
+  --heat-0: #2a2d28;
+  --heat-1: #4d644b;
+  --heat-2: #66846a;
+  --heat-3: #89a689;
+  --heat-4: #b6ccb4;
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-sage: var(--sage);
+  --color-sage-strong: var(--sage-strong);
+  --color-sage-soft: var(--sage-soft);
+  --color-sage-ink: var(--sage-ink);
+  --color-beige: var(--beige);
+  --color-olive: var(--olive);
+  --color-olive-strong: var(--olive-strong);
+  --color-lavender: var(--lavender);
+  --color-lavender-strong: var(--lavender-strong);
+  --color-honey: var(--honey);
+  --color-honey-strong: var(--honey-strong);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+
+  --font-sans: "Inter Variable", "IBM Plex Sans Arabic", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Newsreader Variable", "IBM Plex Sans Arabic", ui-serif, Georgia, serif;
+
+  --radius-card: 16px;
+  --radius-control: 12px;
+
+  --shadow-soft: var(--shadow-sm);
+  --shadow-card: var(--shadow-md);
+  --shadow-float: var(--shadow-lg);
+
+  --animate-fade-in: fade-in 280ms ease-out both;
+  --animate-rise: rise 360ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  --animate-pop: pop 420ms cubic-bezier(0.2, 0.9, 0.3, 1.2) both;
+}
+
+/* Arabic: one family for UI and display so headings stay consistent */
+:root[lang="ar"] {
+  --font-sans: "IBM Plex Sans Arabic", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "IBM Plex Sans Arabic", "Newsreader Variable", ui-serif, serif;
+}
+:root[lang="ar"] body {
+  font-family: "IBM Plex Sans Arabic", "Inter Variable", ui-sans-serif, system-ui, sans-serif;
+  line-height: 1.75;
+}
+:root[lang="ar"] .font-display {
+  font-family: "IBM Plex Sans Arabic", ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes pop {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes breathe {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  body {
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  ::selection {
+    background: var(--sage-soft);
+    color: var(--ink);
+  }
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  h1, h2, h3, h4 {
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+  input, textarea, select, button {
+    font: inherit;
+  }
+  /* Respect reduced motion: keep feedback, drop movement. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 1ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 1ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: var(--font-display);
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--muted) 0%, var(--surface-2) 50%, var(--muted) 100%);
+    background-size: 200% 100%;
+    animation: shimmer 1.6s ease-in-out infinite;
+    border-radius: 10px;
+  }
+  .breathe {
+    animation: breathe 2.4s ease-in-out infinite;
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--muted) transparent;
+  }
+}

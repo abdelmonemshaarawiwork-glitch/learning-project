@@ -1,0 +1,9 @@
+# Netlify: the Next.js runtime (OpenNext) is detected automatically and turns
+# the API route handlers into Netlify Functions.
+[build]
+  command = "npm run build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
+  NEXT_TELEMETRY_DISABLED = "1"
